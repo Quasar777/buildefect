@@ -1,0 +1,39 @@
+@use 'helpers' as *;
+
+html {
+    &.is-lock {
+        overflow: hidden;
+    }
+    scrollbar-gutter: stable;
+}
+
+body
+{
+    @include fluid-text(18, 14);
+    font-family: var(--font-family-base);
+}
+
+main {
+    padding-top: rem(50);
+}
+
+// добавляем плавности для интерактивных элементов
+a,
+button,
+label,
+input,
+select, 
+textarea,
+svg * {
+    transition-duration: var(--transition-duration);
+}
+
+// глобальные стили для ссылок всего проекта
+a {
+    color: inherit;
+    
+    // отклчаем подчеркивание только у тех ссылок, у которых задан класс 
+    &[class] {
+        text-decoration: none;
+    }
+}
