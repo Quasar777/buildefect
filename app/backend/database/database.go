@@ -4,6 +4,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/Quasar777/buildefect/app/backend/models"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -25,7 +26,15 @@ func ConnectDb() {
 	log.Println("Connected to the db successfully")
 	db.Logger = logger.Default.LogMode(logger.Info);
 	log.Println("Running migrations")
-	// TODO: add migrations
+	// add migrations
+	db.AutoMigrate(
+		&models.User{}, 
+		&models.Building{}, 
+		&models.Comment{}, 
+		&models.CommentAttachment{},
+		&models.Defect{},
+		&models.DefectAttachment{},
+	)
 
 	Database = DbInstance{Db: db}
 }
