@@ -4,17 +4,26 @@ import (
 	"log"
 
 	"github.com/Quasar777/buildefect/app/backend/database"
+	"github.com/Quasar777/buildefect/app/backend/routes"
 	"github.com/gofiber/fiber/v2"
 )
+
+func setupRoutes(app *fiber.App) {
+	// User endpoints
+	app.Post("/api/users", routes.CreateUser)
+	
+	app.Get("/api/users", routes.GetUsers)
+
+	app.Get("/api/users/:id", routes.GetUser)
+	
+}
 
 func main() {
 	database.ConnectDb()
 	
 	app := fiber.New()
 
-	app.Get("/", func (c *fiber.Ctx) error {
-        return c.SendString("Hello, World!")
-    })
+	setupRoutes(app)
 
     log.Fatal(app.Listen(":8080"))
 }
