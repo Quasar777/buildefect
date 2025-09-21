@@ -1,8 +1,13 @@
-# BuilDefect - монолитное веб-приложение для централизованного управления дефектами на строительных объектах
+#BuilDefect - monolithic web application for centralized management of defects at construction sites.
 
-Система обеспечивает полный цикл работы: от регистрации дефекта и назначения исполнителя до контроля статусов и формирования отчётности для руководства.
+The system provides a full cycle of work: from defect registration and assignee allocation to status monitoring and report generation for management.
 
-Для кого предназначена система:
-1) для инженеров (регистрация дефектов, обновление информации)
-2) для менеджеров (назначение задач, контроль сроков, формирование отчётов)
-3) для руководителей и заказчиков (просмотр прогресса и отчётности)
+Who the system is for:
+1) Engineers (defect registration, information updates)
+2) Managers (task assignment, deadline monitoring, report generation)
+3) Executives and Clients (progress tracking and report viewing)
+
+
+### ER-diagram
+
+![alt text](https://github.com/Quasar777/buildefect/blob/main/buisness%20analytics/BuilDefect_ER.drawio.png?raw=true)
