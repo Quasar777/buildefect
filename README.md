@@ -1,4 +1,4 @@
-#BuilDefect - monolithic web application for centralized management of defects at construction sites.
+# BuilDefect - monolithic web application for centralized management of defects at construction sites.
 
 The system provides a full cycle of work: from defect registration and assignee allocation to status monitoring and report generation for management.
 
