@@ -38,7 +38,24 @@ func CreateUser(c *fiber.Ctx) error {
 		})
 	}
 
-	database.Database.Db.Create(&user)
+	// TODO: исправить эту логику. Если при запросе случилась ошибка БД (не ErrRecordNotFound), ты интерпретируешь её как "пользователь найден".
+	// check, if user with this login exists
+	var userFromDb models.User
+	result := database.Database.Db.First(&userFromDb, "login = ?", user.Login)
+	
+	if !errors.Is(result.Error, gorm.ErrRecordNotFound) {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "user with this login is already exists",
+		})
+	}
+
+	result = database.Database.Db.Create(&user)
+	if result.Error != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": result.Error.Error(),
+		})
+	}
+
 	responseUser := CreateResponseUser(user)
 
 	return c.Status(fiber.StatusCreated).JSON(responseUser)
