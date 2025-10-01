@@ -4,6 +4,7 @@ import (
 	"github.com/Quasar777/buildefect/app/backend/database"
 	"github.com/Quasar777/buildefect/app/backend/database/postgresql"
 	"github.com/Quasar777/buildefect/app/backend/internal/config"
+	"github.com/Quasar777/buildefect/app/backend/internal/middleware"
 	"github.com/Quasar777/buildefect/app/backend/routes"
 	"github.com/gofiber/fiber/v2"
 	"github.com/rs/zerolog"
@@ -49,7 +50,24 @@ func main() {
 	
 	app := fiber.New()
 
-	setupRoutes(app)
+	// setupRoutes(app)
+
+	// подключение логирования
+	logsMiddleware := middleware.RequestMiddleware(logger)
+	app.Use(logsMiddleware)
+
+	app.Get("/", func(c *fiber.Ctx) error {
+		logger.Info().Msg("Request get")
+		return c.SendString("Hello, World!")
+	})
+
+	app.Post("/", func(c *fiber.Ctx) error {
+		logger.Info().Msg("Request post")
+		if err := pg.DB.Ping(); err != nil {
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+		}
+		return c.Status(fiber.StatusOK).SendString("Pong")
+	})
 	
     // Запуск приложения
 	if err := app.Listen(":8080"); err != nil {
