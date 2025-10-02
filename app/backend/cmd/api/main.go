@@ -9,7 +9,6 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-
 func main() {
 	// Инициализация логгера
 	zerolog.TimeFieldFormat = "02.01.2006 15:04:05.000"
@@ -31,24 +30,10 @@ func main() {
 	
 	app := fiber.New()
 
-	app.Get("/", func(c *fiber.Ctx) error {
-		logger.Info().Msg("Request get")
-		return c.SendString("Hello, World!")
-	})
-
-	app.Post("/", func(c *fiber.Ctx) error {
-		logger.Info().Msg("Request post")
-		if err := pg.DB.Ping(); err != nil {
-			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
-		}
-		return c.Status(fiber.StatusOK).SendString("Pong")
-	})
-
-	routes.RegisterUserRoutes(app, pg.GormDB)
+	routes.RegisterUserRoutes(app, pg.GormDB, cfg.JWTSecret)
 	
     // Запуск приложения
 	if err := app.Listen(":8080"); err != nil {
 		logger.Fatal().Err(err)
 	}
-
 }
