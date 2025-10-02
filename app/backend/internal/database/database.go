@@ -7,7 +7,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/Quasar777/buildefect/app/backend/models"
+	"github.com/Quasar777/buildefect/app/backend/internal/models"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
