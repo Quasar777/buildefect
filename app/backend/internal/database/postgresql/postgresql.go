@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/Quasar777/buildefect/app/backend/internal/config"
-	"github.com/Quasar777/buildefect/app/backend/models"
+	"github.com/Quasar777/buildefect/app/backend/internal/models"
 	"github.com/rs/zerolog"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
