@@ -2,7 +2,6 @@ package main
 
 import (
 	"github.com/Quasar777/buildefect/app/backend/internal/config"
-	"github.com/Quasar777/buildefect/app/backend/internal/database"
 	"github.com/Quasar777/buildefect/app/backend/internal/database/postgresql"
 	"github.com/Quasar777/buildefect/app/backend/internal/routes"
 	"github.com/gofiber/fiber/v2"
@@ -10,28 +9,14 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-func setupRoutes(app *fiber.App) {
-	// User endpoints
-	app.Post("/api/users", routes.CreateUser)
-	
-	app.Get("/api/users", routes.GetUsers)
-
-	app.Get("/api/users/:id", routes.GetUser)	
-	
-	app.Put("/api/users/:id", routes.UpdateUser)
-
-	app.Delete("/api/users/:id", routes.DeleteUser)
-}
 
 func main() {
 	// Инициализация логгера
 	zerolog.TimeFieldFormat = "02.01.2006 15:04:05.000"
 	logger := log.With().Logger()
 
-
 	// Инициализация конфига
 	cfg := config.LoadConfig(logger)
-
 
 	// Подключаемся к Postgres
 	pg, err := postgresql.Connect(cfg, logger)
@@ -43,9 +28,6 @@ func main() {
             logger.Error().Err(err).Msg("failed to close db")
         }
     }()
-
-	// Присваиваем GORM DB в глобальную обертку, которую ты используешь в проекте
-    database.Database = database.DbInstance{Db: pg.GormDB}
 	
 	app := fiber.New()
 
@@ -61,8 +43,9 @@ func main() {
 		}
 		return c.Status(fiber.StatusOK).SendString("Pong")
 	})
-	
 
+	routes.RegisterUserRoutes(app, pg.GormDB)
+	
     // Запуск приложения
 	if err := app.Listen(":8080"); err != nil {
 		logger.Fatal().Err(err)

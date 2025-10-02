@@ -4,14 +4,12 @@ import (
 	"errors"
 	"strconv"
 
-	"github.com/Quasar777/buildefect/app/backend/database"
-	"github.com/Quasar777/buildefect/app/backend/models"
+	"github.com/Quasar777/buildefect/app/backend/internal/models"
 	"github.com/gofiber/fiber/v2"
 	"gorm.io/gorm"
 )
 
-type User struct {
-	// this is not the model User, see this as a serializer
+type UserResponse struct {
 	ID       uint   `json:"id"`
 	Login    string `json:"login"`
 	Name     string `json:"name"`
@@ -19,9 +17,17 @@ type User struct {
 	Role     string `json:"role"`
 }
 
+func RegisterUserRoutes(app *fiber.App, db *gorm.DB) {
+	app.Post("/api/users", func(c *fiber.Ctx) error { return CreateUser(c, db) })
+	app.Get("/api/users", func(c *fiber.Ctx) error { return GetUsers(c, db) })
+	app.Get("/api/users/:id", func(c *fiber.Ctx) error { return GetUser(c, db) })
+	app.Put("/api/users/:id", func(c *fiber.Ctx) error { return UpdateUser(c, db) })
+	app.Delete("/api/users/:id", func(c *fiber.Ctx) error { return DeleteUser(c, db) })
+}
 
-func CreateResponseUser(userModel models.User) User {
-	return User{
+
+func CreateResponseUser(userModel models.User) UserResponse {
+	return UserResponse{
 		ID: userModel.ID,
 		Login: userModel.Login,
 		Name: userModel.Name,
@@ -30,7 +36,7 @@ func CreateResponseUser(userModel models.User) User {
 	}
 }
 
-func CreateUser(c *fiber.Ctx) error {
+func CreateUser(c *fiber.Ctx, db *gorm.DB) error {
 	var user models.User
 	if err := c.BodyParser(&user); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
@@ -38,45 +44,37 @@ func CreateUser(c *fiber.Ctx) error {
 		})
 	}
 
-	// TODO: исправить эту логику. Если при запросе случилась ошибка БД (не ErrRecordNotFound), ты интерпретируешь её как "пользователь найден".
-	// check, if user with this login exists
-	var userFromDb models.User
-	result := database.Database.Db.First(&userFromDb, "login = ?", user.Login)
-	
-	if !errors.Is(result.Error, gorm.ErrRecordNotFound) {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": "user with this login is already exists",
-		})
+	var cnt int64
+	if err := db.Model(&models.User{}).Where("login = ?", user.Login).Count(&cnt).Error; err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "database error"})
+	}
+	if cnt > 0 {
+		return c.Status(fiber.StatusConflict).JSON(fiber.Map{"error": "user with this login already exists"})
 	}
 
-	result = database.Database.Db.Create(&user)
-	if result.Error != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": result.Error.Error(),
-		})
+	if err := db.Create(&user).Error; err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 
-	responseUser := CreateResponseUser(user)
-
-	return c.Status(fiber.StatusCreated).JSON(responseUser)
+	return c.Status(fiber.StatusCreated).JSON(CreateResponseUser(user))
 }
 
-func GetUsers(c *fiber.Ctx) error {
+
+func GetUsers(c *fiber.Ctx, db *gorm.DB) error {
 	users := []models.User{}
 
-	database.Database.Db.Find(&users)
-
-	responseUsers := []User{}
-
-	for _, user := range users {
-		responseUser := CreateResponseUser(user)
-		responseUsers = append(responseUsers, responseUser)
+	if err := db.Find(&users).Error; err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "database error"})
 	}
-
-	return c.Status(fiber.StatusOK).JSON(responseUsers)
+	resp := make([]UserResponse, 0, len(users))
+	for _, u := range users {
+		resp = append(resp, CreateResponseUser(u))
+	}
+	return c.Status(fiber.StatusOK).JSON(resp)
 }
 
-func GetUser(c *fiber.Ctx) error {
+
+func GetUser(c *fiber.Ctx, db *gorm.DB) error {
 	id, err := c.ParamsInt("id")
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
@@ -85,24 +83,19 @@ func GetUser(c *fiber.Ctx) error {
 	}
 
 	var user models.User
-	result := database.Database.Db.First(&user, id)
+	result := db.First(&user, id)
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
-			"error": "user not found",
-		})
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "user not found"})
 	}
 	if result.Error != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": "database error",
-		})
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "database error"})
 	}
 
-	responseUser := CreateResponseUser(user)
-
-	return c.Status(fiber.StatusOK).JSON(responseUser)
+	return c.Status(fiber.StatusOK).JSON(CreateResponseUser(user))
 }
 
-func UpdateUser(c *fiber.Ctx) error {
+
+func UpdateUser(c *fiber.Ctx, db *gorm.DB) error {
 	id, err := c.ParamsInt("id")
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
@@ -111,7 +104,7 @@ func UpdateUser(c *fiber.Ctx) error {
 	}
 
 	var user models.User
-	result := database.Database.Db.First(&user, id)
+	result := db.First(&user, id)
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
 			"error": "user not found",
@@ -123,30 +116,32 @@ func UpdateUser(c *fiber.Ctx) error {
 		})
 	}
 	
-	type UpdateUser struct {
+	type UpdateUserReq struct {
 		Name string `json:"name"`
 		LastName string `json:"lastname"`
 	}
 
-	var updateData UpdateUser 
-	if err := c.BodyParser(&updateData); err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": err.Error(),
-		})
+	var req UpdateUserReq
+	if err := c.BodyParser(&req); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+	}
+	if req.Name != "" {
+		user.Name = req.Name
+	}
+	if req.LastName != "" {
+		user.LastName = req.LastName
+	}
+	
+
+	if err := db.Save(&user).Error; err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "failed to save"})
 	}
 
-	user.LastName = updateData.LastName
-	user.Name = updateData.Name
-
-	database.Database.Db.Save(&user)
-
-	responseUser := CreateResponseUser(user)
-	return c.Status(fiber.StatusOK).JSON(responseUser)
+	return c.Status(fiber.StatusOK).JSON(CreateResponseUser(user))
 
 }
 
-
-func DeleteUser(c *fiber.Ctx) error {
+func DeleteUser(c *fiber.Ctx, db *gorm.DB) error {
 	id, err := c.ParamsInt("id")
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
@@ -155,7 +150,7 @@ func DeleteUser(c *fiber.Ctx) error {
 	}
 
 	var user models.User
-	result := database.Database.Db.First(&user, id)
+	result := db.First(&user, id)
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
 			"error": "user not found",
@@ -167,7 +162,7 @@ func DeleteUser(c *fiber.Ctx) error {
 		})
 	}
 
-	if err := database.Database.Db.Delete(&user).Error; err != nil {
+	if err := db.Delete(&user).Error; err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
 			"error": "user not found",
 		})
