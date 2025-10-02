@@ -17,7 +17,7 @@ type Config struct {
     DBPassword string
     DBName     string
 
-	// возможно добавить кеширование(Redis) и S3 хранилище(MinIO)
+	JWTSecret string
 }
 
 func LoadConfig(l zerolog.Logger) *Config {
@@ -33,6 +33,7 @@ func LoadConfig(l zerolog.Logger) *Config {
 	cfg.DBUser = getEnv("POSTGRES_USER", "postgres")
 	cfg.DBPassword = getEnv("POSTGRES_PASSWORD", "postgres")
 	cfg.DBName = getEnv("POSTGRES_DB", "app")
+	cfg.JWTSecret = getEnv("JWT_SECRET", "replace-this-secret")
 
 	// Для запуска через Docker
 	if getEnv("IS_DOCKER", "") == "true" {

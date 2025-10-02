@@ -191,3 +191,16 @@ func (h *UserHandler) DeleteUser(c *fiber.Ctx) error {
 
 	return c.Status(fiber.StatusOK).SendString("Successfully deleted user with id " + strconv.Itoa(int(user.ID)) )
 }
+
+func (h *UserHandler) GetUserByCtx(c *fiber.Ctx) error {
+    uidRaw := c.Locals("user_id")
+    if uidRaw == nil {
+        return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "unauthenticated"})
+    }
+    uid := uidRaw.(uint)
+    var user models.User
+    if err := h.db.First(&user, uid).Error; err != nil {
+        return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "db error"})
+    }
+    return c.Status(fiber.StatusOK).JSON(CreateResponseUser(user))
+}
