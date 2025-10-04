@@ -30,6 +30,6 @@ func RegisterUserRoutes(app *fiber.App, db *gorm.DB, jwtSecret string) {
 	)
 	app.Get("/api/users", uh.GetUsers)
 	app.Get("/api/users/:id", uh.GetUser)
-	app.Put("/api/users/:id", uh.UpdateUser)
+	app.Patch("/api/users/:id", uh.UpdateUser)
 	app.Delete("/api/users/:id", uh.DeleteUser)
 }

@@ -153,7 +153,6 @@ func (h *UserHandler) UpdateUser(c *fiber.Ctx) error {
 	if req.LastName != "" {
 		user.LastName = req.LastName
 	}
-	
 
 	if err := h.db.Save(&user).Error; err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "failed to save"})
@@ -192,6 +191,7 @@ func (h *UserHandler) DeleteUser(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).SendString("Successfully deleted user with id " + strconv.Itoa(int(user.ID)) )
 }
 
+//function for test
 func (h *UserHandler) GetUserByCtx(c *fiber.Ctx) error {
     uidRaw := c.Locals("user_id")
     if uidRaw == nil {

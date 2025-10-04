@@ -31,6 +31,7 @@ func main() {
 	app := fiber.New()
 
 	routes.RegisterUserRoutes(app, pg.GormDB, cfg.JWTSecret)
+	routes.RegisterBuildingRoutes(app, pg.GormDB)
 	
     // Запуск приложения
 	if err := app.Listen(":8080"); err != nil {
