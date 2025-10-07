@@ -33,6 +33,7 @@ func main() {
 	routes.RegisterUserRoutes(app, pg.GormDB, cfg.JWTSecret)
 	routes.RegisterBuildingRoutes(app, pg.GormDB)
 	routes.RegisterDefectRoutes(app, pg.GormDB, cfg.JWTSecret)
+	routes.RegisterCommentsRoutes(app, pg.GormDB, cfg.JWTSecret)
 	
     // Запуск приложения
 	if err := app.Listen(":8080"); err != nil {
