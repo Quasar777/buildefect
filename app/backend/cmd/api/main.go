@@ -34,6 +34,10 @@ func main() {
 	routes.RegisterBuildingRoutes(app, pg.GormDB)
 	routes.RegisterDefectRoutes(app, pg.GormDB, cfg.JWTSecret)
 	routes.RegisterCommentsRoutes(app, pg.GormDB, cfg.JWTSecret)
+	routes.RegisterDefectAttachmentsRoutes(app, pg.GormDB)
+
+	// статическая отдача файлов
+	app.Static("/uploads", "internal/uploads")
 	
     // Запуск приложения
 	if err := app.Listen(":8080"); err != nil {
