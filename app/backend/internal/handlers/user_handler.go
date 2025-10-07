@@ -167,8 +167,8 @@ func (h *UserHandler) DeleteUser(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": "invalid id",
 		})
-	}
-
+	} 
+	
 	var user models.User
 	result := h.db.First(&user, id)
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
