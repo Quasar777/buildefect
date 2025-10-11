@@ -125,6 +125,7 @@ func (h *UserHandler) CreateUser(c *fiber.Ctx) error {
 // @Produce     json
 // @Success     200   {array}   UserResponse
 // @Failure     500   {object}  common.ErrorResponse
+// @Security    BearerAuth
 // @Router      /api/users [get]
 func (h *UserHandler) GetUsers(c *fiber.Ctx) error {
 	users := []models.User{}
@@ -150,6 +151,7 @@ func (h *UserHandler) GetUsers(c *fiber.Ctx) error {
 // @Failure     400  {object}  common.ErrorResponse  "invalid id"
 // @Failure     404  {object}  common.ErrorResponse  "user not found"
 // @Failure     500  {object}  common.ErrorResponse
+// @Security    BearerAuth
 // @Router      /api/users/{id} [get]
 func (h *UserHandler) GetUser(c *fiber.Ctx) error {
 	id, err := c.ParamsInt("id")
@@ -183,6 +185,7 @@ func (h *UserHandler) GetUser(c *fiber.Ctx) error {
 // @Failure     400   {object}  common.ErrorResponse
 // @Failure     404   {object}  common.ErrorResponse
 // @Failure     500   {object}  common.ErrorResponse
+// @Security    BearerAuth
 // @Router      /api/users/{id} [patch]
 func (h *UserHandler) UpdateUser(c *fiber.Ctx) error {
 	id, err := c.ParamsInt("id")
@@ -239,6 +242,7 @@ func (h *UserHandler) UpdateUser(c *fiber.Ctx) error {
 // @Failure     400  {object}  common.ErrorResponse
 // @Failure     404  {object}  common.ErrorResponse
 // @Failure     500  {object}  common.ErrorResponse
+// @Security    BearerAuth
 // @Router      /api/users/{id} [delete]
 func (h *UserHandler) DeleteUser(c *fiber.Ctx) error {
 	id, err := c.ParamsInt("id")

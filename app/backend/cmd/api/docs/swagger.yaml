@@ -276,6 +276,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/common.ErrorResponse'
+      security:
+      - BearerAuth: []
       summary: Delete defect attachment
       tags:
       - defect-attachments
@@ -426,6 +428,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/common.ErrorResponse'
+      security:
+      - BearerAuth: []
       summary: Create building
       tags:
       - buildings
@@ -459,6 +463,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/common.ErrorResponse'
+      security:
+      - BearerAuth: []
       summary: Delete building
       tags:
       - buildings
@@ -529,6 +535,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/common.ErrorResponse'
+      security:
+      - BearerAuth: []
       summary: Update building
       tags:
       - buildings
@@ -784,6 +792,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/common.ErrorResponse'
+      security:
+      - BearerAuth: []
       summary: Delete defect
       tags:
       - defects
@@ -911,6 +921,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/common.ErrorResponse'
+      security:
+      - BearerAuth: []
       summary: Get users
       tags:
       - users
@@ -978,6 +990,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/common.ErrorResponse'
+      security:
+      - BearerAuth: []
       summary: Delete user
       tags:
       - users
@@ -1010,6 +1024,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/common.ErrorResponse'
+      security:
+      - BearerAuth: []
       summary: Get user by id
       tags:
       - users
@@ -1048,6 +1064,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/common.ErrorResponse'
+      security:
+      - BearerAuth: []
       summary: Update user
       tags:
       - users

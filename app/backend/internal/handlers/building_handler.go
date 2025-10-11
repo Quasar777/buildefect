@@ -70,6 +70,7 @@ func toBuildingResponse(b models.Building) BuildingResponse {
 // @Success     201     {object} BuildingResponse
 // @Failure     400     {object} common.ErrorResponse "invalid request body or missing fields"
 // @Failure     500     {object} common.ErrorResponse
+// @Security    BearerAuth
 // @Router      /api/buildings [post]
 func (h *BuildingHandler) CreateBuilding(c *fiber.Ctx) error {
 	var req CreateBuildingRequest
@@ -164,6 +165,7 @@ func (h *BuildingHandler) GetBuilding(c *fiber.Ctx) error {
 // @Failure     400     {object}  common.ErrorResponse
 // @Failure     404     {object}  common.ErrorResponse
 // @Failure     500     {object}  common.ErrorResponse
+// @Security    BearerAuth
 // @Router      /api/buildings/{id} [patch]
 func (h *BuildingHandler) UpdateBuilding(c *fiber.Ctx) error {
 	id, err := c.ParamsInt("id")
@@ -227,6 +229,7 @@ func (h *BuildingHandler) UpdateBuilding(c *fiber.Ctx) error {
 // @Failure     400  {object}  common.ErrorResponse
 // @Failure     404  {object}  common.ErrorResponse
 // @Failure     500  {object}  common.ErrorResponse
+// @Security    BearerAuth
 // @Router      /api/buildings/{id} [delete]
 func (h *BuildingHandler) DeleteBuilding(c *fiber.Ctx) error {
 	id, err := c.ParamsInt("id")

@@ -20,11 +20,31 @@ func RegisterUserRoutes(app *fiber.App, db *gorm.DB, jwtSecret string) {
 	// user managing
 	app.Post("/api/users", 
 		middleware.JWTMiddleware(jwtSecret),
-		middleware.RequireRole("observer"), 
+		middleware.RequireRoles("observer"), 
 		uh.CreateUser,
 	)
-	app.Get("/api/users", uh.GetUsers)
-	app.Get("/api/users/:id", uh.GetUser)
-	app.Patch("/api/users/:id", uh.UpdateUser)
-	app.Delete("/api/users/:id", uh.DeleteUser)
+	
+	app.Get("/api/users", 
+		middleware.JWTMiddleware(jwtSecret),
+		middleware.RequireRoles("observer"), 
+		uh.GetUsers,
+	)
+
+	app.Get("/api/users/:id", 
+		middleware.JWTMiddleware(jwtSecret),
+		middleware.RequireRoles("observer"), 
+		uh.GetUser,
+	)
+
+	app.Patch("/api/users/:id", 
+		middleware.JWTMiddleware(jwtSecret),
+		middleware.RequireRoles("observer"), 
+		uh.UpdateUser,
+	)
+
+	app.Delete("/api/users/:id", 
+		middleware.JWTMiddleware(jwtSecret),
+		middleware.RequireRoles("observer"), 
+		uh.DeleteUser,
+	)
 }

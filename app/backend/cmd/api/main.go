@@ -40,10 +40,10 @@ func main() {
 	app := fiber.New()
 
 	routes.RegisterUserRoutes(app, pg.GormDB, cfg.JWTSecret)
-	routes.RegisterBuildingRoutes(app, pg.GormDB)
+	routes.RegisterBuildingRoutes(app, pg.GormDB, cfg.JWTSecret)
 	routes.RegisterDefectRoutes(app, pg.GormDB, cfg.JWTSecret)
 	routes.RegisterCommentsRoutes(app, pg.GormDB, cfg.JWTSecret)
-	routes.RegisterDefectAttachmentsRoutes(app, pg.GormDB)
+	routes.RegisterDefectAttachmentsRoutes(app, pg.GormDB, cfg.JWTSecret)
 	// TODO: create api for comment attachments
 
 	// статическая отдача файлов

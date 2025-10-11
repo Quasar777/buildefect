@@ -65,6 +65,11 @@ const docTemplate = `{
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Delete a defect attachment by attachment ID",
                 "consumes": [
                     "application/json"
@@ -252,6 +257,11 @@ const docTemplate = `{
                 }
             },
             "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Create a new building record",
                 "consumes": [
                     "application/json"
@@ -346,6 +356,11 @@ const docTemplate = `{
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Delete building by id",
                 "consumes": [
                     "application/json"
@@ -394,6 +409,11 @@ const docTemplate = `{
                 }
             },
             "patch": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Partially update building (name/address/stage)",
                 "consumes": [
                     "application/json"
@@ -843,6 +863,11 @@ const docTemplate = `{
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Delete defect by id",
                 "consumes": [
                     "application/json"
@@ -1006,6 +1031,11 @@ const docTemplate = `{
         },
         "/api/users": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Retrieve list of all users",
                 "consumes": [
                     "application/json"
@@ -1092,6 +1122,11 @@ const docTemplate = `{
         },
         "/api/users/{id}": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Retrieve user by numeric id",
                 "consumes": [
                     "application/json"
@@ -1140,6 +1175,11 @@ const docTemplate = `{
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Delete user by numeric id",
                 "consumes": [
                     "application/json"
@@ -1188,6 +1228,11 @@ const docTemplate = `{
                 }
             },
             "patch": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Update user's name and/or lastname",
                 "consumes": [
                     "application/json"

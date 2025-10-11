@@ -2,25 +2,38 @@ package routes
 
 import (
 	"github.com/Quasar777/buildefect/app/backend/internal/handlers"
+	"github.com/Quasar777/buildefect/app/backend/internal/middleware"
 	"github.com/gofiber/fiber/v2"
 	"gorm.io/gorm"
 )
 
 
-func RegisterBuildingRoutes(app *fiber.App, db *gorm.DB) {
+func RegisterBuildingRoutes(app *fiber.App, db *gorm.DB, jwtSecret string) {
 	h := handlers.NewBuildingHandler(db)
 
 	// TODO: сделать возможность обновления и создания данных только для ролей observer и manager. 
 	// Сейчас оставлю так для удобства тестирования
 
 
-	app.Post("/api/buildings", h.CreateBuilding)
+	app.Post("/api/buildings", 
+		middleware.JWTMiddleware(jwtSecret),
+		middleware.RequireRoles("observer", "manager"),
+		h.CreateBuilding,
+	)
 
 	app.Get("/api/buildings", h.GetBuildings)
 
 	app.Get("/api/buildings/:id", h.GetBuilding)
 
-	app.Patch("/api/buildings/:id", h.UpdateBuilding)
+	app.Patch("/api/buildings/:id", 
+		middleware.JWTMiddleware(jwtSecret),
+		middleware.RequireRoles("observer", "manager"),
+		h.UpdateBuilding,
+	)
 
-	app.Delete("/api/buildings/:id", h.DeleteBuilding)
+	app.Delete("/api/buildings/:id", 
+		middleware.JWTMiddleware(jwtSecret),
+		middleware.RequireRoles("observer", "manager"),
+		h.DeleteBuilding,
+	)
 }

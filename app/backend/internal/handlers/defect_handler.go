@@ -358,6 +358,7 @@ func (h *DefectHandler) GetDefect(c *fiber.Ctx) error {
 // @Failure     400  {object}  common.ErrorResponse
 // @Failure     404  {object}  common.ErrorResponse
 // @Failure     500  {object}  common.ErrorResponse
+// @Security    BearerAuth
 // @Router      /api/defects/{id} [delete]
 func (h *DefectHandler) DeleteDefect(c *fiber.Ctx) error {
 	id, err := c.ParamsInt("id")

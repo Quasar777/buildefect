@@ -163,6 +163,7 @@ func (h *DefectAttachmentHandler) GetDefectAttachment(c *fiber.Ctx) error {
 // @Failure     400  {object}  common.ErrorResponse
 // @Failure     404  {object}  common.ErrorResponse
 // @Failure     500  {object}  common.ErrorResponse
+// @Security    BearerAuth
 // @Router      /api/attachments/{id} [delete]
 func (h *DefectAttachmentHandler) DeleteDefectAttachment(c *fiber.Ctx) error {
 	attachmentID, err := c.ParamsInt("id")

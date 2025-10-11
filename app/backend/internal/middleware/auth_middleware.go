@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"fmt"
 	"strconv"
 	"strings"
 
@@ -56,15 +55,30 @@ func JWTMiddleware(secret string) fiber.Handler {
 	}
 }
 
-func RequireRole(role string) fiber.Handler {
-    return func(c *fiber.Ctx) error {
-        r := c.Locals("role") // получаем роль из JWT
-		fmt.Println(r)
-        if r == nil || r.(string) != role {
-            return c.Status(fiber.StatusForbidden).JSON(fiber.Map{
-                "error": "insufficient permissions",
-            })
-        }
-        return c.Next()
-    }
+func RequireRoles(roles ...string) fiber.Handler {
+	roleSet := make(map[string]struct{})
+	for _, r := range roles {
+		roleSet[r] = struct{}{}
+	}
+
+	return func(c *fiber.Ctx) error {
+		r := c.Locals("role")
+		if r == nil {
+			return c.Status(fiber.StatusForbidden).JSON(fiber.Map{
+				"error": "insufficient permissions",
+			})
+		}
+		roleStr, ok := r.(string)
+		if !ok {
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+				"error": "invalid role in context",
+			})
+		}
+		if _, allowed := roleSet[roleStr]; !allowed {
+			return c.Status(fiber.StatusForbidden).JSON(fiber.Map{
+				"error": "insufficient permissions",
+			})
+		}
+		return c.Next()
+	}
 }
