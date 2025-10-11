@@ -9,16 +9,44 @@ import (
 	"github.com/Quasar777/buildefect/app/backend/internal/models"
 	"github.com/gofiber/fiber/v2"
 	"gorm.io/gorm"
+	"github.com/Quasar777/buildefect/app/backend/internal/common"
 )
+
+var _ = common.ErrorResponse{} // костыль для swagger: без этой строчки будет ../common imported and not used
 
 type DefectAttachmentHandler struct {
 	db *gorm.DB
+}
+
+// DefectAttachmentResponse описывает файл вложения дефекта.
+// swagger:model DefectAttachmentResponse
+type DefectAttachmentResponse struct {
+    // example: 1
+    ID       uint   `json:"id"`
+    // example: 2
+    DefectID uint   `json:"defect_id"`
+    // example: internal/uploads/defect_attachments/1759835216551583000_broken_wall.png
+    URL      string `json:"url"`
 }
 
 func NewDefectAttachmentHandler(db *gorm.DB) *DefectAttachmentHandler {
 	return &DefectAttachmentHandler{db: db}
 }
 
+// UploadDefectAttachment загружает файл вложения для дефекта.
+// @Summary     Upload defect attachment
+// @Description Upload a file for a specific defect. Requires authentication.
+// @Tags        defect-attachments
+// @Accept      multipart/form-data
+// @Produce     json
+// @Param       id    path      int     true  "Defect ID"
+// @Param       file  formData  file    true  "File to upload"
+// @Success     201  {object}  DefectAttachmentResponse
+// @Failure     400  {object}  common.ErrorResponse
+// @Failure     404  {object}  common.ErrorResponse
+// @Failure     500  {object}  common.ErrorResponse
+// @Security    BearerAuth
+// @Router      /api/defects/{id}/attachments [post]
 func (h *DefectAttachmentHandler) UploadDefectAttachment(c *fiber.Ctx) error {
 	defectID, err := c.ParamsInt("id")
 	if err != nil {
@@ -61,6 +89,18 @@ func (h *DefectAttachmentHandler) UploadDefectAttachment(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusCreated).JSON(attachment)
 }
 
+// GetDefectAttachments возвращает список вложений дефекта.
+// @Summary     List defect attachments
+// @Description Get all attachments for a specific defect
+// @Tags        defect-attachments
+// @Accept      json
+// @Produce     json
+// @Param       id  path  int  true  "Defect ID"
+// @Success     200  {array}   DefectAttachmentResponse
+// @Failure     400  {object}  common.ErrorResponse
+// @Failure     404  {object}  common.ErrorResponse
+// @Failure     500  {object}  common.ErrorResponse
+// @Router      /api/defects/{id}/attachments [get]
 func (h *DefectAttachmentHandler) GetDefectAttachments(c *fiber.Ctx) error {
     defectID, err := c.ParamsInt("id")
     if err != nil {
@@ -83,6 +123,18 @@ func (h *DefectAttachmentHandler) GetDefectAttachments(c *fiber.Ctx) error {
     return c.Status(fiber.StatusOK).JSON(attachments)
 }
 
+// GetDefectAttachment возвращает конкретное вложение дефекта по ID.
+// @Summary     Get defect attachment
+// @Description Get defect attachment by attachment ID
+// @Tags        defect-attachments
+// @Accept      json
+// @Produce     json
+// @Param       id  path  int  true  "Attachment ID"
+// @Success     200  {object}  DefectAttachmentResponse
+// @Failure     400  {object}  common.ErrorResponse
+// @Failure     404  {object}  common.ErrorResponse
+// @Failure     500  {object}  common.ErrorResponse
+// @Router      /api/attachments/{id} [get]
 func (h *DefectAttachmentHandler) GetDefectAttachment(c *fiber.Ctx) error {
     attachmentID, err := c.ParamsInt("id")
     if err != nil {
@@ -100,6 +152,18 @@ func (h *DefectAttachmentHandler) GetDefectAttachment(c *fiber.Ctx) error {
     return c.Status(fiber.StatusOK).JSON(attachment)
 }
 
+// DeleteDefectAttachment удаляет вложение дефекта по ID.
+// @Summary     Delete defect attachment
+// @Description Delete a defect attachment by attachment ID
+// @Tags        defect-attachments
+// @Accept      json
+// @Produce     json
+// @Param       id  path  int  true  "Attachment ID"
+// @Success     200  {object}  map[string]string  "attachment deleted successfully"
+// @Failure     400  {object}  common.ErrorResponse
+// @Failure     404  {object}  common.ErrorResponse
+// @Failure     500  {object}  common.ErrorResponse
+// @Router      /api/attachments/{id} [delete]
 func (h *DefectAttachmentHandler) DeleteDefectAttachment(c *fiber.Ctx) error {
 	attachmentID, err := c.ParamsInt("id")
 	if err != nil {

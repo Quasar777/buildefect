@@ -13,9 +13,14 @@ func RegisterBuildingRoutes(app *fiber.App, db *gorm.DB) {
 	// TODO: сделать возможность обновления и создания данных только для ролей observer и manager. 
 	// Сейчас оставлю так для удобства тестирования
 
+
 	app.Post("/api/buildings", h.CreateBuilding)
+
 	app.Get("/api/buildings", h.GetBuildings)
+
 	app.Get("/api/buildings/:id", h.GetBuilding)
+
 	app.Patch("/api/buildings/:id", h.UpdateBuilding)
+
 	app.Delete("/api/buildings/:id", h.DeleteBuilding)
 }

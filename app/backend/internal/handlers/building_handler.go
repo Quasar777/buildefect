@@ -7,7 +7,10 @@ import (
 	"github.com/Quasar777/buildefect/app/backend/internal/models"
 	"github.com/gofiber/fiber/v2"
 	"gorm.io/gorm"
+	"github.com/Quasar777/buildefect/app/backend/internal/common"
 )
+
+var _ = common.ErrorResponse{} // костыль для swagger: без этой строчки будет ../common imported and not used
 
 type BuildingHandler struct {
 	db *gorm.DB
@@ -17,17 +20,35 @@ func NewBuildingHandler(db *gorm.DB) *BuildingHandler {
 	return &BuildingHandler{db: db}
 }
 
+// CreateBuildingRequest описывает тело запроса для создания здания.
+// swagger:model CreateBuildingRequest
 type CreateBuildingRequest struct {
-	Name    string `json:"name"`
-	Address string `json:"address"`
-	Stage   string `json:"stage"`
+    // example: Дом на Невском
+    Name    string `json:"name"`
+    // example: Невский пр., 1
+    Address string `json:"address"`
+    // example: построено
+    Stage   string `json:"stage"`
 }
 
+// BuildingResponse описывает структуру ответа для здания.
+// swagger:model BuildingResponse
 type BuildingResponse struct {
-	ID      uint   `json:"id"`
-	Name    string `json:"name"`
-	Address string `json:"address"`
-	Stage   string `json:"stage"`
+    ID      uint   `json:"id"`
+    Name    string `json:"name"`
+    Address string `json:"address"`
+    Stage   string `json:"stage"`
+}
+
+// UpdateBuildingRequest используется для частичного обновления здания.
+// swagger:model UpdateBuildingRequest
+type UpdateBuildingRequest struct {
+    // example: Новый дом
+    Name    string `json:"name"`
+    // example: Новый адрес
+    Address string `json:"address"`
+    // example: в_строительстве
+    Stage   string `json:"stage"`
 }
 
 func toBuildingResponse(b models.Building) BuildingResponse {
@@ -39,6 +60,17 @@ func toBuildingResponse(b models.Building) BuildingResponse {
 	}
 }
 
+// CreateBuilding creates a new building.
+// @Summary     Create building
+// @Description Create a new building record
+// @Tags        buildings
+// @Accept      json
+// @Produce     json
+// @Param       payload body     CreateBuildingRequest true "Building payload"
+// @Success     201     {object} BuildingResponse
+// @Failure     400     {object} common.ErrorResponse "invalid request body or missing fields"
+// @Failure     500     {object} common.ErrorResponse
+// @Router      /api/buildings [post]
 func (h *BuildingHandler) CreateBuilding(c *fiber.Ctx) error {
 	var req CreateBuildingRequest
 	if err := c.BodyParser(&req); err != nil {
@@ -62,6 +94,15 @@ func (h *BuildingHandler) CreateBuilding(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusCreated).JSON(toBuildingResponse(building))
 }
 
+// GetBuildings returns list of buildings.
+// @Summary     List buildings
+// @Description Retrieve list of all buildings
+// @Tags        buildings
+// @Accept      json
+// @Produce     json
+// @Success     200  {array}  BuildingResponse
+// @Failure     500  {object} common.ErrorResponse
+// @Router      /api/buildings [get]
 func (h *BuildingHandler) GetBuildings(c *fiber.Ctx) error {
 	var buildings []models.Building
 
@@ -79,6 +120,18 @@ func (h *BuildingHandler) GetBuildings(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(resp)
 }
 
+// GetBuilding returns building by id.
+// @Summary     Get building by id
+// @Description Retrieve building by numeric id
+// @Tags        buildings
+// @Accept      json
+// @Produce     json
+// @Param       id   path      int  true  "Building ID"
+// @Success     200  {object}  BuildingResponse
+// @Failure     400  {object}  common.ErrorResponse "invalid id"
+// @Failure     404  {object}  common.ErrorResponse "building not found"
+// @Failure     500  {object}  common.ErrorResponse
+// @Router      /api/buildings/{id} [get]
 func (h *BuildingHandler) GetBuilding(c *fiber.Ctx) error {
 	id, err := c.ParamsInt("id")
 	if err != nil {
@@ -99,6 +152,19 @@ func (h *BuildingHandler) GetBuilding(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(toBuildingResponse(building))
 }
 
+// UpdateBuilding updates building fields partially.
+// @Summary     Update building
+// @Description Partially update building (name/address/stage)
+// @Tags        buildings
+// @Accept      json
+// @Produce     json
+// @Param       id      path      int                   true  "Building ID"
+// @Param       payload body      UpdateBuildingRequest  true  "Update payload"
+// @Success     200     {object}  BuildingResponse
+// @Failure     400     {object}  common.ErrorResponse
+// @Failure     404     {object}  common.ErrorResponse
+// @Failure     500     {object}  common.ErrorResponse
+// @Router      /api/buildings/{id} [patch]
 func (h *BuildingHandler) UpdateBuilding(c *fiber.Ctx) error {
 	id, err := c.ParamsInt("id")
 	if err != nil {
@@ -120,6 +186,7 @@ func (h *BuildingHandler) UpdateBuilding(c *fiber.Ctx) error {
 		})
 	}
 
+	// TODO: Наверно можно убрать, если я вынес это вверху
 	// DTO для частичного обновления
 	type UpdateBuildingReq struct {
 		Name    string `json:"name"`
@@ -149,6 +216,18 @@ func (h *BuildingHandler) UpdateBuilding(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(toBuildingResponse(building))
 }
 
+// DeleteBuilding removes building by id.
+// @Summary     Delete building
+// @Description Delete building by id
+// @Tags        buildings
+// @Accept      json
+// @Produce     plain
+// @Param       id   path      int  true  "Building ID"
+// @Success     200  {string}  string "Successfully deleted building with id {id}"
+// @Failure     400  {object}  common.ErrorResponse
+// @Failure     404  {object}  common.ErrorResponse
+// @Failure     500  {object}  common.ErrorResponse
+// @Router      /api/buildings/{id} [delete]
 func (h *BuildingHandler) DeleteBuilding(c *fiber.Ctx) error {
 	id, err := c.ParamsInt("id")
 	if err != nil {

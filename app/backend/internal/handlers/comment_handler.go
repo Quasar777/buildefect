@@ -8,7 +8,10 @@ import (
 	"github.com/Quasar777/buildefect/app/backend/internal/models"
 	"github.com/gofiber/fiber/v2"
 	"gorm.io/gorm"
+	"github.com/Quasar777/buildefect/app/backend/internal/common"
 )
+
+var _ = common.ErrorResponse{} // костыль для swagger: без этой строчки будет ../common imported and not used
 
 
 type CommentHandler struct {
@@ -19,17 +22,28 @@ func NewCommentHandler(db *gorm.DB) *CommentHandler {
 	return &CommentHandler{db: db}
 }
 
+// CreateCommentRequest описывает тело запроса для создания комментария
+// swagger:model CreateCommentRequest
 type CreateCommentRequest struct {
-	DefectID uint   `json:"defect_id"`
-	Text     string `json:"text"`
+    // example: 1
+    DefectID uint   `json:"defect_id"`
+    // example: Found a broken window on 3rd floor
+    Text     string `json:"text"`
 }
 
+// CommentResponse описывает комментарий
+// swagger:model CommentResponse
 type CommentResponse struct {
-	ID        uint      `json:"id"`
-	DefectID  uint      `json:"defect_id"`
-	CreatedAt time.Time `json:"created_at"`
-	CreatedBy uint      `json:"created_by"`
-	Text      string    `json:"text"`
+    // example: 1
+    ID        uint      `json:"id"`
+    // example: 1
+    DefectID  uint      `json:"defect_id"`
+    // example: 2025-10-11T14:00:00Z
+    CreatedAt time.Time `json:"created_at"`
+    // example: 2
+    CreatedBy uint      `json:"created_by"`
+    // example: Broken glass needs replacement
+    Text      string    `json:"text"`
 }
 
 func CreateResponseComment(comment models.Comment) CommentResponse {
@@ -42,6 +56,19 @@ func CreateResponseComment(comment models.Comment) CommentResponse {
 	}
 }
 
+// CreateComment создаёт новый комментарий к дефекту
+// @Summary     Create a comment
+// @Description Create a new comment for a specific defect. Requires authentication.
+// @Tags        comments
+// @Accept      json
+// @Produce     json
+// @Param       comment  body      CreateCommentRequest  true  "Comment payload"
+// @Success     201  {object}  CommentResponse
+// @Failure     400  {object}  common.ErrorResponse
+// @Failure     404  {object}  common.ErrorResponse
+// @Failure     500  {object}  common.ErrorResponse
+// @Security    BearerAuth
+// @Router      /api/comments [post]
 func (h *CommentHandler) CreateComment(c *fiber.Ctx) error {
 	var req CreateCommentRequest
 	if err := c.BodyParser(&req); err != nil {
@@ -76,7 +103,18 @@ func (h *CommentHandler) CreateComment(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusCreated).JSON(CreateResponseComment(comment))
 }
 
-// It is NOT possible to get all the existing comments (and why would you want to?)
+// GetComments возвращает список комментариев для дефекта
+// @Summary     List comments
+// @Description Get all comments for a specific defect
+// @Tags        comments
+// @Accept      json
+// @Produce     json
+// @Param       defect_id  query     int  true  "Defect ID"
+// @Success     200  {array}   CommentResponse
+// @Failure     400  {object}  common.ErrorResponse
+// @Failure     404  {object}  common.ErrorResponse
+// @Failure     500  {object}  common.ErrorResponse
+// @Router      /api/comments [get]
 func (h *CommentHandler) GetComments(c *fiber.Ctx) error {
 	var comments []models.Comment
 
@@ -100,6 +138,18 @@ func (h *CommentHandler) GetComments(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(resp)
 }
 
+// GetComment возвращает конкретный комментарий по ID
+// @Summary     Get a comment
+// @Description Get a comment by ID
+// @Tags        comments
+// @Accept      json
+// @Produce     json
+// @Param       id  path  int  true  "Comment ID"
+// @Success     200  {object}  CommentResponse
+// @Failure     400  {object}  common.ErrorResponse
+// @Failure     404  {object}  common.ErrorResponse
+// @Failure     500  {object}  common.ErrorResponse
+// @Router      /api/comments/{id} [get]
 func (h *CommentHandler) GetComment(c *fiber.Ctx) error {
 	id, err := c.ParamsInt("id")
 	if err != nil {
@@ -119,7 +169,20 @@ func (h *CommentHandler) GetComment(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(resp)
 }
 
-// delete a comment can only user with role "observer"
+// DeleteComment удаляет комментарий по ID (только для пользователя с ролью "observer")
+// @Summary     Delete a comment
+// @Description Delete a comment by ID. Only users with role "observer" are allowed.
+// @Tags        comments
+// @Accept      json
+// @Produce     json
+// @Param       id  path  int  true  "Comment ID"
+// @Success     200  {string}  string  "Successfully deleted comment with id {id}"
+// @Failure     400  {object}  common.ErrorResponse
+// @Failure     403  {object}  common.ErrorResponse
+// @Failure     404  {object}  common.ErrorResponse
+// @Failure     500  {object}  common.ErrorResponse
+// @Security    BearerAuth
+// @Router      /api/comments/{id} [delete]
 func (h *CommentHandler) DeleteComment(c *fiber.Ctx) error {
 	id, err := c.ParamsInt("id")
 	if err != nil {

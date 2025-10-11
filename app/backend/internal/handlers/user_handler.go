@@ -8,7 +8,10 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
+	"github.com/Quasar777/buildefect/app/backend/internal/common"
 )
+
+var _ = common.ErrorResponse{} // костыль для swagger: без этой строчки будет ../common imported and not used
 
 type UserHandler struct {
     db *gorm.DB
@@ -18,14 +21,23 @@ func NewUserHandler(db *gorm.DB) *UserHandler {
     return &UserHandler{db: db}
 }
 
+// CreateUserRequest represents request body to create a user.
+// swagger:model CreateUserRequest
 type CreateUserRequest struct {
+    // example: ivan123
     Login    string `json:"login"`
+    // example: passw0rd
     Password string `json:"password"`
+    // example: Ivan
     Name     string `json:"name"`
+    // example: Ivanov
     LastName string `json:"lastname"`
+    // example: observer
     Role     string `json:"role"`
 }
 
+// UserResponse represents user data returned by API.
+// swagger:model UserResponse
 type UserResponse struct {
 	ID       uint   `json:"id"`
 	Login    string `json:"login"`
@@ -44,6 +56,27 @@ func CreateResponseUser(userModel models.User) UserResponse {
 	}
 }
 
+// UpdateUserRequest defines input for updating user.
+// swagger:model UpdateUserRequest
+type UpdateUserRequest struct {
+    // example: Ivan
+    Name     string `json:"name"`
+    // example: Ivanov
+    LastName string `json:"lastname"`
+}
+
+// CreateUser creates a new user.
+// @Summary     Create a new user
+// @Tags        users
+// @Accept      json
+// @Produce     json
+// @Param       user  body      CreateUserRequest  true  "New user data"
+// @Success     201   {object}  UserResponse
+// @Failure     400   {object}  common.ErrorResponse
+// @Failure     409   {object}  common.ErrorResponse
+// @Failure     500   {object}  common.ErrorResponse
+// @Security    BearerAuth
+// @Router      /api/users [post]
 func (h *UserHandler) CreateUser(c *fiber.Ctx) error {
     var req CreateUserRequest
     if err := c.BodyParser(&req); err != nil {
@@ -54,7 +87,7 @@ func (h *UserHandler) CreateUser(c *fiber.Ctx) error {
         return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "login and password are required"})
     }
 
-    // проверка уникальности
+    // проверка уникальности (уникальность также проверяется через тег unique в модели user)
     var cnt int64
     if err := h.db.Model(&models.User{}).Where("login = ?", req.Login).Count(&cnt).Error; err != nil {
         return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "database error"})
@@ -84,6 +117,15 @@ func (h *UserHandler) CreateUser(c *fiber.Ctx) error {
     return c.Status(fiber.StatusCreated).JSON(CreateResponseUser(user))
 }
 
+// GetUsers returns list of users.
+// @Summary     Get users
+// @Description Retrieve list of all users
+// @Tags        users
+// @Accept      json
+// @Produce     json
+// @Success     200   {array}   UserResponse
+// @Failure     500   {object}  common.ErrorResponse
+// @Router      /api/users [get]
 func (h *UserHandler) GetUsers(c *fiber.Ctx) error {
 	users := []models.User{}
 
@@ -97,6 +139,18 @@ func (h *UserHandler) GetUsers(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(resp)
 }
 
+// GetUser returns a user by id.
+// @Summary     Get user by id
+// @Description Retrieve user by numeric id
+// @Tags        users
+// @Accept      json
+// @Produce     json
+// @Param       id   path      int  true  "User ID"
+// @Success     200  {object}  UserResponse
+// @Failure     400  {object}  common.ErrorResponse  "invalid id"
+// @Failure     404  {object}  common.ErrorResponse  "user not found"
+// @Failure     500  {object}  common.ErrorResponse
+// @Router      /api/users/{id} [get]
 func (h *UserHandler) GetUser(c *fiber.Ctx) error {
 	id, err := c.ParamsInt("id")
 	if err != nil {
@@ -117,6 +171,19 @@ func (h *UserHandler) GetUser(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(CreateResponseUser(user))
 }
 
+// UpdateUser updates user's name/lastname.
+// @Summary     Update user
+// @Description Update user's name and/or lastname
+// @Tags        users
+// @Accept      json
+// @Produce     json
+// @Param       id    path      int                true  "User ID"
+// @Param       data  body      UpdateUserRequest  true  "Update payload"
+// @Success     200   {object}  UserResponse
+// @Failure     400   {object}  common.ErrorResponse
+// @Failure     404   {object}  common.ErrorResponse
+// @Failure     500   {object}  common.ErrorResponse
+// @Router      /api/users/{id} [patch]
 func (h *UserHandler) UpdateUser(c *fiber.Ctx) error {
 	id, err := c.ParamsInt("id")
 	if err != nil {
@@ -161,6 +228,18 @@ func (h *UserHandler) UpdateUser(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(CreateResponseUser(user))
 }
 
+// DeleteUser deletes user by id.
+// @Summary     Delete user
+// @Description Delete user by numeric id
+// @Tags        users
+// @Accept      json
+// @Produce     plain
+// @Param       id   path      int  true  "User ID"
+// @Success     200  {string}  string  "Successfully deleted user with id {id}"
+// @Failure     400  {object}  common.ErrorResponse
+// @Failure     404  {object}  common.ErrorResponse
+// @Failure     500  {object}  common.ErrorResponse
+// @Router      /api/users/{id} [delete]
 func (h *UserHandler) DeleteUser(c *fiber.Ctx) error {
 	id, err := c.ParamsInt("id")
 	if err != nil {
@@ -189,18 +268,4 @@ func (h *UserHandler) DeleteUser(c *fiber.Ctx) error {
 	}
 
 	return c.Status(fiber.StatusOK).SendString("Successfully deleted user with id " + strconv.Itoa(int(user.ID)) )
-}
-
-//function for test
-func (h *UserHandler) GetUserByCtx(c *fiber.Ctx) error {
-    uidRaw := c.Locals("user_id")
-    if uidRaw == nil {
-        return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "unauthenticated"})
-    }
-    uid := uidRaw.(uint)
-    var user models.User
-    if err := h.db.First(&user, uid).Error; err != nil {
-        return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "db error"})
-    }
-    return c.Status(fiber.StatusOK).JSON(CreateResponseUser(user))
 }

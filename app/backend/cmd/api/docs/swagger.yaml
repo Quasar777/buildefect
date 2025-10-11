@@ -1,0 +1,1059 @@
+definitions:
+  common.ErrorResponse:
+    properties:
+      error:
+        description: 'example: user not found'
+        type: string
+    type: object
+  handlers.BuildingResponse:
+    properties:
+      address:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      stage:
+        type: string
+    type: object
+  handlers.CommentResponse:
+    properties:
+      created_at:
+        description: 'example: 2025-10-11T14:00:00Z'
+        type: string
+      created_by:
+        description: 'example: 2'
+        type: integer
+      defect_id:
+        description: 'example: 1'
+        type: integer
+      id:
+        description: 'example: 1'
+        type: integer
+      text:
+        description: 'example: Broken glass needs replacement'
+        type: string
+    type: object
+  handlers.CreateBuildingRequest:
+    properties:
+      address:
+        description: 'example: Невский пр., 1'
+        type: string
+      name:
+        description: 'example: Дом на Невском'
+        type: string
+      stage:
+        description: 'example: построено'
+        type: string
+    type: object
+  handlers.CreateCommentRequest:
+    properties:
+      defect_id:
+        description: 'example: 1'
+        type: integer
+      text:
+        description: 'example: Found a broken window on 3rd floor'
+        type: string
+    type: object
+  handlers.CreateDefectRequest:
+    properties:
+      building_id:
+        description: 'example: 1'
+        type: integer
+      deadline:
+        description: |-
+          example: 2025-12-31 23:59:59
+          deadline in layout "2006-01-02 15:04:05"
+        type: string
+      description:
+        description: 'example: Описание дефекта...'
+        type: string
+      priority:
+        description: 'example: high'
+        type: string
+      responsible_person_id:
+        description: 'example: 2'
+        type: integer
+      status:
+        description: 'example: new'
+        type: string
+      title:
+        description: 'example: Трещина в стене'
+        type: string
+    type: object
+  handlers.CreateUserRequest:
+    properties:
+      lastname:
+        description: 'example: Ivanov'
+        type: string
+      login:
+        description: 'example: ivan123'
+        type: string
+      name:
+        description: 'example: Ivan'
+        type: string
+      password:
+        description: 'example: passw0rd'
+        type: string
+      role:
+        description: 'example: observer'
+        type: string
+    type: object
+  handlers.DefectAttachmentResponse:
+    properties:
+      defect_id:
+        description: 'example: 2'
+        type: integer
+      id:
+        description: 'example: 1'
+        type: integer
+      url:
+        description: 'example: internal/uploads/defect_attachments/1759835216551583000_broken_wall.png'
+        type: string
+    type: object
+  handlers.DefectResponse:
+    properties:
+      building:
+        $ref: '#/definitions/handlers.SimpleBuilding'
+      building_id:
+        type: integer
+      created_at:
+        type: string
+      created_by:
+        $ref: '#/definitions/handlers.SimpleUser'
+      created_by_person_id:
+        type: integer
+      deadline:
+        type: string
+      description:
+        type: string
+      id:
+        type: integer
+      priority:
+        type: string
+      responsible:
+        $ref: '#/definitions/handlers.SimpleUser'
+      responsible_person_id:
+        type: integer
+      status:
+        type: string
+      title:
+        type: string
+      updated_at:
+        type: string
+      updated_by_person_id:
+        type: integer
+    type: object
+  handlers.LoginRequest:
+    properties:
+      login:
+        description: 'example: ivan123'
+        type: string
+      password:
+        description: 'example: passw0rd'
+        type: string
+    type: object
+  handlers.RegisterRequest:
+    properties:
+      lastname:
+        description: 'example: Ivanov'
+        type: string
+      login:
+        description: 'example: ivan123'
+        type: string
+      name:
+        description: 'example: Ivan'
+        type: string
+      password:
+        description: 'example: passw0rd'
+        type: string
+    type: object
+  handlers.SimpleBuilding:
+    properties:
+      address:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      stage:
+        type: string
+    type: object
+  handlers.SimpleUser:
+    properties:
+      id:
+        type: integer
+      lastname:
+        type: string
+      login:
+        type: string
+      name:
+        type: string
+      role:
+        type: string
+    type: object
+  handlers.TokenResponse:
+    properties:
+      access_token:
+        description: access token signed with server secret
+        type: string
+      expires_in:
+        description: seconds until token expiration
+        type: integer
+      token_type:
+        description: token type, usually "Bearer"
+        type: string
+    type: object
+  handlers.UpdateBuildingRequest:
+    properties:
+      address:
+        description: 'example: Новый адрес'
+        type: string
+      name:
+        description: 'example: Новый дом'
+        type: string
+      stage:
+        description: 'example: в_строительстве'
+        type: string
+    type: object
+  handlers.UpdateUserRequest:
+    properties:
+      lastname:
+        description: 'example: Ivanov'
+        type: string
+      name:
+        description: 'example: Ivan'
+        type: string
+    type: object
+  handlers.UserResponse:
+    properties:
+      id:
+        type: integer
+      lastname:
+        type: string
+      login:
+        type: string
+      name:
+        type: string
+      role:
+        type: string
+    type: object
+info:
+  contact: {}
+  description: this is documentation for buildefect API
+  title: buildefect api
+  version: "1.0"
+paths:
+  /api/attachments/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a defect attachment by attachment ID
+      parameters:
+      - description: Attachment ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: attachment deleted successfully
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/common.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/common.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/common.ErrorResponse'
+      summary: Delete defect attachment
+      tags:
+      - defect-attachments
+    get:
+      consumes:
+      - application/json
+      description: Get defect attachment by attachment ID
+      parameters:
+      - description: Attachment ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.DefectAttachmentResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/common.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/common.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/common.ErrorResponse'
+      summary: Get defect attachment
+      tags:
+      - defect-attachments
+  /api/auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Validate credentials and return access token with expiry seconds
+      parameters:
+      - description: Login payload
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.TokenResponse'
+        "400":
+          description: invalid request body
+          schema:
+            $ref: '#/definitions/common.ErrorResponse'
+        "401":
+          description: invalid credentials
+          schema:
+            $ref: '#/definitions/common.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/common.ErrorResponse'
+      summary: Login and obtain JWT
+      tags:
+      - auth
+  /api/auth/register:
+    post:
+      consumes:
+      - application/json
+      description: Create a new user account (no JWT returned). Default role = "engineer".
+      parameters:
+      - description: Registration payload
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.RegisterRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/handlers.UserResponse'
+        "400":
+          description: invalid request body or missing fields
+          schema:
+            $ref: '#/definitions/common.ErrorResponse'
+        "409":
+          description: user already exists
+          schema:
+            $ref: '#/definitions/common.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/common.ErrorResponse'
+      summary: Register a user
+      tags:
+      - auth
+  /api/buildings:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve list of all buildings
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/handlers.BuildingResponse'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/common.ErrorResponse'
+      summary: List buildings
+      tags:
+      - buildings
+    post:
+      consumes:
+      - application/json
+      description: Create a new building record
+      parameters:
+      - description: Building payload
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.CreateBuildingRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/handlers.BuildingResponse'
+        "400":
+          description: invalid request body or missing fields
+          schema:
+            $ref: '#/definitions/common.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/common.ErrorResponse'
+      summary: Create building
+      tags:
+      - buildings
+  /api/buildings/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete building by id
+      parameters:
+      - description: Building ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: Successfully deleted building with id {id}
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/common.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/common.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/common.ErrorResponse'
+      summary: Delete building
+      tags:
+      - buildings
+    get:
+      consumes:
+      - application/json
+      description: Retrieve building by numeric id
+      parameters:
+      - description: Building ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.BuildingResponse'
+        "400":
+          description: invalid id
+          schema:
+            $ref: '#/definitions/common.ErrorResponse'
+        "404":
+          description: building not found
+          schema:
+            $ref: '#/definitions/common.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/common.ErrorResponse'
+      summary: Get building by id
+      tags:
+      - buildings
+    patch:
+      consumes:
+      - application/json
+      description: Partially update building (name/address/stage)
+      parameters:
+      - description: Building ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Update payload
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.UpdateBuildingRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.BuildingResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/common.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/common.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/common.ErrorResponse'
+      summary: Update building
+      tags:
+      - buildings
+  /api/comments:
+    get:
+      consumes:
+      - application/json
+      description: Get all comments for a specific defect
+      parameters:
+      - description: Defect ID
+        in: query
+        name: defect_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/handlers.CommentResponse'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/common.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/common.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/common.ErrorResponse'
+      summary: List comments
+      tags:
+      - comments
+    post:
+      consumes:
+      - application/json
+      description: Create a new comment for a specific defect. Requires authentication.
+      parameters:
+      - description: Comment payload
+        in: body
+        name: comment
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.CreateCommentRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/handlers.CommentResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/common.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/common.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/common.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Create a comment
+      tags:
+      - comments
+  /api/comments/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a comment by ID. Only users with role "observer" are allowed.
+      parameters:
+      - description: Comment ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully deleted comment with id {id}
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/common.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/common.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/common.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/common.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Delete a comment
+      tags:
+      - comments
+    get:
+      consumes:
+      - application/json
+      description: Get a comment by ID
+      parameters:
+      - description: Comment ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.CommentResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/common.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/common.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/common.ErrorResponse'
+      summary: Get a comment
+      tags:
+      - comments
+  /api/defects:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve defects with optional filters and pagination
+      parameters:
+      - description: Filter by status
+        in: query
+        name: status
+        type: string
+      - description: Filter by building id
+        in: query
+        name: building_id
+        type: integer
+      - description: Filter by responsible user id
+        in: query
+        name: responsible_id
+        type: integer
+      - description: Limit number of results (default 100)
+        in: query
+        name: limit
+        type: integer
+      - description: Offset for pagination (default 0)
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/handlers.DefectResponse'
+            type: array
+        "400":
+          description: invalid query param
+          schema:
+            $ref: '#/definitions/common.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/common.ErrorResponse'
+      summary: List defects
+      tags:
+      - defects
+    post:
+      consumes:
+      - application/json
+      description: Create a defect. Requires authentication.
+      parameters:
+      - description: Defect payload
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.CreateDefectRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/handlers.DefectResponse'
+        "400":
+          description: invalid request body or missing fields
+          schema:
+            $ref: '#/definitions/common.ErrorResponse'
+        "401":
+          description: unauthenticated
+          schema:
+            $ref: '#/definitions/common.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/common.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Create defect
+      tags:
+      - defects
+  /api/defects/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete defect by id
+      parameters:
+      - description: Defect ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: Successfully deleted defect with id {id}
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/common.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/common.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/common.ErrorResponse'
+      summary: Delete defect
+      tags:
+      - defects
+    get:
+      consumes:
+      - application/json
+      description: Retrieve defect by numeric id
+      parameters:
+      - description: Defect ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.DefectResponse'
+        "400":
+          description: invalid id
+          schema:
+            $ref: '#/definitions/common.ErrorResponse'
+        "404":
+          description: defect not found
+          schema:
+            $ref: '#/definitions/common.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/common.ErrorResponse'
+      summary: Get defect by id
+      tags:
+      - defects
+  /api/defects/{id}/attachments:
+    get:
+      consumes:
+      - application/json
+      description: Get all attachments for a specific defect
+      parameters:
+      - description: Defect ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/handlers.DefectAttachmentResponse'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/common.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/common.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/common.ErrorResponse'
+      summary: List defect attachments
+      tags:
+      - defect-attachments
+    post:
+      consumes:
+      - multipart/form-data
+      description: Upload a file for a specific defect. Requires authentication.
+      parameters:
+      - description: Defect ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: File to upload
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/handlers.DefectAttachmentResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/common.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/common.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/common.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Upload defect attachment
+      tags:
+      - defect-attachments
+  /api/users:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve list of all users
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/handlers.UserResponse'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/common.ErrorResponse'
+      summary: Get users
+      tags:
+      - users
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: New user data
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.CreateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/handlers.UserResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/common.ErrorResponse'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/common.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/common.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Create a new user
+      tags:
+      - users
+  /api/users/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete user by numeric id
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: Successfully deleted user with id {id}
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/common.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/common.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/common.ErrorResponse'
+      summary: Delete user
+      tags:
+      - users
+    get:
+      consumes:
+      - application/json
+      description: Retrieve user by numeric id
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.UserResponse'
+        "400":
+          description: invalid id
+          schema:
+            $ref: '#/definitions/common.ErrorResponse'
+        "404":
+          description: user not found
+          schema:
+            $ref: '#/definitions/common.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/common.ErrorResponse'
+      summary: Get user by id
+      tags:
+      - users
+    patch:
+      consumes:
+      - application/json
+      description: Update user's name and/or lastname
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Update payload
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.UpdateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.UserResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/common.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/common.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/common.ErrorResponse'
+      summary: Update user
+      tags:
+      - users
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

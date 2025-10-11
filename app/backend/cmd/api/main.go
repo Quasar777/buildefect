@@ -7,8 +7,17 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
+
+	"github.com/gofiber/swagger"
+	_ "github.com/Quasar777/buildefect/app/backend/cmd/api/docs"
 )
 
+// @title           buildefect api
+// @version         1.0
+// @description     this is documentation for buildefect API
+// @securityDefinitions.apikey  BearerAuth
+// @in                         header
+// @name                       Authorization
 func main() {
 	// Инициализация логгера
 	zerolog.TimeFieldFormat = "02.01.2006 15:04:05.000"
@@ -35,10 +44,14 @@ func main() {
 	routes.RegisterDefectRoutes(app, pg.GormDB, cfg.JWTSecret)
 	routes.RegisterCommentsRoutes(app, pg.GormDB, cfg.JWTSecret)
 	routes.RegisterDefectAttachmentsRoutes(app, pg.GormDB)
+	// TODO: create api for comment attachments
 
 	// статическая отдача файлов
 	app.Static("/uploads", "internal/uploads")
 	
+	// swagger
+    app.Get("/swagger/*", swagger.HandlerDefault)
+
     // Запуск приложения
 	if err := app.Listen(":8080"); err != nil {
 		logger.Fatal().Err(err)

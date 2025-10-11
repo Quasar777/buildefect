@@ -9,7 +9,10 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
+	"github.com/Quasar777/buildefect/app/backend/internal/common"
 )
+
+var _ = common.ErrorResponse{} // костыль для swagger: без этой строчки будет ../common imported and not used
 
 type AuthHandler struct {
 	db        *gorm.DB
@@ -25,25 +28,52 @@ func NewAuthHandler(db *gorm.DB, jwtSecret string, ttl time.Duration) *AuthHandl
 	}
 }
 
+
+// RegisterRequest represents request to register a new user.
+// swagger:model RegisterRequest
 type RegisterRequest struct {
-	Login    string `json:"login"`
-	Password string `json:"password"`
-	Name     string `json:"name"`
-	LastName string `json:"lastname"`
+    // example: ivan123
+    Login    string `json:"login"`
+    // example: passw0rd
+    Password string `json:"password"`
+    // example: Ivan
+    Name     string `json:"name"`
+    // example: Ivanov
+    LastName string `json:"lastname"`
 }
 
+// LoginRequest represents login request.
+// swagger:model LoginRequest
 type LoginRequest struct {
-	Login    string `json:"login"`
-	Password string `json:"password"`
+    // example: ivan123
+    Login    string `json:"login"`
+    // example: passw0rd
+    Password string `json:"password"`
 }
 
+// TokenResponse represents JWT token response.
+// swagger:model TokenResponse
 type TokenResponse struct {
-	AccessToken string `json:"access_token"`
-	TokenType   string `json:"token_type"`
-	ExpiresIn   int64  `json:"expires_in"`
+    // access token signed with server secret
+    AccessToken string `json:"access_token"`
+    // token type, usually "Bearer"
+    TokenType   string `json:"token_type"`
+    // seconds until token expiration
+    ExpiresIn   int64  `json:"expires_in"`
 }
 
-// Register — регистрирует пользователя (без выдачи токена)
+// Register registers a new user (no token returned).
+// @Summary     Register a user
+// @Description Create a new user account (no JWT returned). Default role = "engineer".
+// @Tags        auth
+// @Accept      json
+// @Produce     json
+// @Param       payload  body      RegisterRequest  true  "Registration payload"
+// @Success     201      {object}  UserResponse
+// @Failure     400      {object}  common.ErrorResponse  "invalid request body or missing fields"
+// @Failure     409      {object}  common.ErrorResponse  "user already exists"
+// @Failure     500      {object}  common.ErrorResponse
+// @Router      /api/auth/register [post]
 func (h *AuthHandler) Register(c *fiber.Ctx) error {
 	var req RegisterRequest
 	if err := c.BodyParser(&req); err != nil {
@@ -86,7 +116,18 @@ func (h *AuthHandler) Register(c *fiber.Ctx) error {
 	})
 }
 
-// Login — проверяет credentials и возвращает JWT
+// Login authenticates user and returns JWT token.
+// @Summary     Login and obtain JWT
+// @Description Validate credentials and return access token with expiry seconds
+// @Tags        auth
+// @Accept      json
+// @Produce     json
+// @Param       payload  body      LoginRequest   true  "Login payload"
+// @Success     200      {object}  TokenResponse
+// @Failure     400      {object}  common.ErrorResponse  "invalid request body"
+// @Failure     401      {object}  common.ErrorResponse  "invalid credentials"
+// @Failure     500      {object}  common.ErrorResponse
+// @Router      /api/auth/login [post]
 func (h *AuthHandler) Login(c *fiber.Ctx) error {
 	var req LoginRequest
 	if err := c.BodyParser(&req); err != nil {

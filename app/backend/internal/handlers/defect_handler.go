@@ -8,7 +8,10 @@ import (
 	"github.com/Quasar777/buildefect/app/backend/internal/models"
 	"github.com/gofiber/fiber/v2"
 	"gorm.io/gorm"
+	"github.com/Quasar777/buildefect/app/backend/internal/common"
 )
+
+var _ = common.ErrorResponse{} // костыль для swagger: без этой строчки будет ../common imported and not used
 
 type DefectHandler struct {
 	db *gorm.DB
@@ -18,32 +21,47 @@ func NewDefectHandler(db *gorm.DB) *DefectHandler {
 	return &DefectHandler{db: db}
 }
 
-// DTOs
+// CreateDefectRequest описывает тело запроса для создания дефекта.
+// swagger:model CreateDefectRequest
 type CreateDefectRequest struct {
-	BuildingID          uint   `json:"building_id"`
-	Title               string `json:"title"`
-	Description         string `json:"description"`
-	Priority            string `json:"priority"`               // low, medium, high
-	ResponsiblePersonID *uint  `json:"responsible_person_id"`  // optional
-	Deadline            string `json:"deadline"`               // RFC3339 string, optional
-	Status              string `json:"status"`                 // optional, default "new"
+    // example: 1
+    BuildingID          uint   `json:"building_id"`
+    // example: Трещина в стене
+    Title               string `json:"title"`
+    // example: Описание дефекта...
+    Description         string `json:"description"`
+    // example: high
+    Priority            string `json:"priority"`               // low, medium, high
+    // example: 2
+    ResponsiblePersonID *uint  `json:"responsible_person_id"`  // optional
+    // example: 2025-12-31 23:59:59
+    // deadline in layout "2006-01-02 15:04:05"
+    Deadline            string `json:"deadline"`               // optional, format: "2006-01-02 15:04:05"
+    // example: new
+    Status              string `json:"status"`                 // optional, default "new"
 }
 
+// SimpleUser краткая модель пользователя для вложенных сущностей.
+// swagger:model SimpleUser
 type SimpleUser struct {
-	ID       uint   `json:"id"`
-	Login    string `json:"login"`
-	Name     string `json:"name"`
-	LastName string `json:"lastname"`
-	Role     string `json:"role"`
+    ID       uint   `json:"id"`
+    Login    string `json:"login"`
+    Name     string `json:"name"`
+    LastName string `json:"lastname"`
+    Role     string `json:"role"`
 }
 
+// SimpleBuilding краткая модель здания.
+// swagger:model SimpleBuilding
 type SimpleBuilding struct {
-	ID      uint   `json:"id"`
-	Name    string `json:"name"`
-	Address string `json:"address"`
-	Stage   string `json:"stage"`
+    ID      uint   `json:"id"`
+    Name    string `json:"name"`
+    Address string `json:"address"`
+    Stage   string `json:"stage"`
 }
 
+// DefectResponse описывает ответ для дефекта.
+// swagger:model DefectResponse
 type DefectResponse struct {
 	ID                  uint           `json:"id"`
 	BuildingID          uint           `json:"building_id"`
@@ -98,6 +116,19 @@ func toDefectResponse(d models.Defect) DefectResponse {
 	return resp
 }
 
+// CreateDefect creates a new defect.
+// @Summary     Create defect
+// @Description Create a defect. Requires authentication.
+// @Tags        defects
+// @Accept      json
+// @Produce     json
+// @Param       payload  body      CreateDefectRequest  true  "Defect payload"
+// @Success     201      {object}  DefectResponse
+// @Failure     400      {object}  common.ErrorResponse  "invalid request body or missing fields"
+// @Failure     401      {object}  common.ErrorResponse  "unauthenticated"
+// @Failure     500      {object}  common.ErrorResponse
+// @Security    BearerAuth
+// @Router      /api/defects [post]
 func (h *DefectHandler) CreateDefect(c *fiber.Ctx) error {
 	var req CreateDefectRequest
 	if err := c.BodyParser(&req); err != nil {
@@ -217,6 +248,21 @@ func (h *DefectHandler) CreateDefect(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusCreated).JSON(resp)
 }
 
+// GetDefects returns list of defects with optional filters.
+// @Summary     List defects
+// @Description Retrieve defects with optional filters and pagination
+// @Tags        defects
+// @Accept      json
+// @Produce     json
+// @Param       status         query     string  false  "Filter by status"
+// @Param       building_id    query     int     false  "Filter by building id"
+// @Param       responsible_id query     int     false  "Filter by responsible user id"
+// @Param       limit          query     int     false  "Limit number of results (default 100)"
+// @Param       offset         query     int     false  "Offset for pagination (default 0)"
+// @Success     200  {array}   DefectResponse
+// @Failure     400  {object}  common.ErrorResponse  "invalid query param"
+// @Failure     500  {object}  common.ErrorResponse
+// @Router      /api/defects [get]
 func (h *DefectHandler) GetDefects(c *fiber.Ctx) error {
 	q := h.db.Preload("Building").Preload("CreatedBy").Preload("Responsible")
 
@@ -271,6 +317,18 @@ func (h *DefectHandler) GetDefects(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(resp)
 }
 
+// GetDefect returns defect by id.
+// @Summary     Get defect by id
+// @Description Retrieve defect by numeric id
+// @Tags        defects
+// @Accept      json
+// @Produce     json
+// @Param       id   path      int  true  "Defect ID"
+// @Success     200  {object}  DefectResponse
+// @Failure     400  {object}  common.ErrorResponse  "invalid id"
+// @Failure     404  {object}  common.ErrorResponse  "defect not found"
+// @Failure     500  {object}  common.ErrorResponse
+// @Router      /api/defects/{id} [get]
 func (h *DefectHandler) GetDefect(c *fiber.Ctx) error {
 	id, err := c.ParamsInt("id")
 	if err != nil {
@@ -289,7 +347,18 @@ func (h *DefectHandler) GetDefect(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(toDefectResponse(defect))
 }
 
-// DeleteDefect — удаляет дефект по id
+// DeleteDefect deletes defect by id.
+// @Summary     Delete defect
+// @Description Delete defect by id
+// @Tags        defects
+// @Accept      json
+// @Produce     plain
+// @Param       id   path      int  true  "Defect ID"
+// @Success     200  {string}  string  "Successfully deleted defect with id {id}"
+// @Failure     400  {object}  common.ErrorResponse
+// @Failure     404  {object}  common.ErrorResponse
+// @Failure     500  {object}  common.ErrorResponse
+// @Router      /api/defects/{id} [delete]
 func (h *DefectHandler) DeleteDefect(c *fiber.Ctx) error {
 	id, err := c.ParamsInt("id")
 	if err != nil {
