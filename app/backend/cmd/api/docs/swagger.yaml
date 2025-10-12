@@ -216,6 +216,14 @@ definitions:
         description: 'example: в_строительстве'
         type: string
     type: object
+  handlers.UpdateStatusReq:
+    properties:
+      status:
+        description: |-
+          example: in_progress
+          Возможные значения: "new", "in_progress", "review", "closed" (зависит от вашей логики)
+        type: string
+    type: object
   handlers.UpdateUserRequest:
     properties:
       lastname:
@@ -827,6 +835,56 @@ paths:
           schema:
             $ref: '#/definitions/common.ErrorResponse'
       summary: Get defect by id
+      tags:
+      - defects
+    patch:
+      consumes:
+      - application/json
+      description: 'Change status of a defect. Allowed status transitions depend on
+        user role (engineer/manager). Allowed status values: new, in_progress, review,
+        closed.'
+      parameters:
+      - description: Defect ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: New status
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.UpdateStatusReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.DefectResponse'
+        "400":
+          description: invalid id or request body or missing status
+          schema:
+            $ref: '#/definitions/common.ErrorResponse'
+        "401":
+          description: unauthenticated
+          schema:
+            $ref: '#/definitions/common.ErrorResponse'
+        "403":
+          description: insufficient permissions or role cannot set this status
+          schema:
+            $ref: '#/definitions/common.ErrorResponse'
+        "404":
+          description: defect not found
+          schema:
+            $ref: '#/definitions/common.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/common.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Update defect status
       tags:
       - defects
   /api/defects/{id}/attachments:

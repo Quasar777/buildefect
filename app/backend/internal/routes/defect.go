@@ -14,11 +14,15 @@ func RegisterDefectRoutes(app *fiber.App, db *gorm.DB, jwtSecret string) {
 
 	app.Post("/api/defects", 
 		middleware.JWTMiddleware(jwtSecret),
-		middleware.RequireRoles("observer", "manager"),
 		dh.CreateDefect,
 	)
 	app.Get("/api/defects", dh.GetDefects)
 	app.Get("/api/defects/:id", dh.GetDefect)
+
+	app.Patch("/api/defects/:id", 
+		middleware.JWTMiddleware(jwtSecret),
+		dh.UpdateStatus,
+	)
 	
 	app.Delete("api/defects/:id",
 		middleware.JWTMiddleware(jwtSecret),

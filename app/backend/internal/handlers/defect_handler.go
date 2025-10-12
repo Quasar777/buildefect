@@ -80,6 +80,14 @@ type DefectResponse struct {
 	Status              string         `json:"status"`
 }
 
+// UpdateStatusReq описывает тело запроса для изменения статуса дефекта.
+// swagger:model UpdateStatusReq
+type UpdateStatusReq struct {
+	// example: in_progress
+    // Возможные значения: "new", "in_progress", "review", "closed" (зависит от вашей логики)
+	Status string `json:"status"`
+}
+
 func toSimpleUser(u models.User) SimpleUser {
 	return SimpleUser{ID: u.ID, Login: u.Login, Name: u.Name, LastName: u.LastName, Role: u.Role}
 }
@@ -346,6 +354,104 @@ func (h *DefectHandler) GetDefect(c *fiber.Ctx) error {
 
 	return c.Status(fiber.StatusOK).JSON(toDefectResponse(defect))
 }
+
+// UpdateStatus changes defect status according to role permissions.
+// @Summary     Update defect status
+// @Description Change status of a defect. Allowed status transitions depend on user role (engineer/manager). Allowed status values: new, in_progress, review, closed.
+// @Tags        defects
+// @Accept      json
+// @Produce     json
+// @Param       id      path      int             true  "Defect ID"
+// @Param       payload body      UpdateStatusReq  true  "New status"
+// @Success     200     {object}  DefectResponse
+// @Failure     400     {object}  common.ErrorResponse  "invalid id or request body or missing status"
+// @Failure     401     {object}  common.ErrorResponse  "unauthenticated"
+// @Failure     403     {object}  common.ErrorResponse  "insufficient permissions or role cannot set this status"
+// @Failure     404     {object}  common.ErrorResponse  "defect not found"
+// @Failure     500     {object}  common.ErrorResponse
+// @Security    BearerAuth
+// @Router 		/api/defects/{id} [patch]
+func (h *DefectHandler) UpdateStatus(c *fiber.Ctx) error {
+	// parse id
+	id, err := c.ParamsInt("id")
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "invalid id"})
+	}
+
+	// parse body
+	var req UpdateStatusReq
+	if err := c.BodyParser(&req); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "invalid request body"})
+	}
+	if req.Status == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "status is required"})
+	}
+
+	// get role and user id from context (set by JWTMiddleware)
+	roleRaw := c.Locals("role")
+	if roleRaw == nil {
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "unauthenticated"})
+	}
+	role, ok := roleRaw.(string)
+	if !ok {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "invalid role in context"})
+	}
+
+	uidRaw := c.Locals("user_id")
+	if uidRaw == nil {
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "unauthenticated"})
+	}
+	uid, ok := uidRaw.(uint)
+	if !ok {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "invalid user id in context"})
+	}
+
+	// define allowed targets per role
+	allowed := map[string]struct{}{}
+	switch role {
+	case "engineer":
+		allowed["in_progress"] = struct{}{}
+		allowed["review"] = struct{}{}
+	case "manager":
+		allowed["in_progress"] = struct{}{}
+		allowed["review"] = struct{}{}
+		allowed["closed"] = struct{}{}
+	default:
+		// other roles can't change status
+		return c.Status(fiber.StatusForbidden).JSON(fiber.Map{"error": "insufficient permissions"})
+	}
+
+	// check requested status is allowed
+	if _, ok := allowed[req.Status]; !ok {
+		return c.Status(fiber.StatusForbidden).JSON(fiber.Map{"error": "role cannot set this status"})
+	}
+
+	// load defect
+	var defect models.Defect
+	res := h.db.First(&defect, id)
+	if errors.Is(res.Error, gorm.ErrRecordNotFound) {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "defect not found"})
+	}
+	if res.Error != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "database error"})
+	}
+
+	// update fields
+	defect.Status = req.Status
+	defect.UpdatedByPersonID = uid
+
+	if err := h.db.Save(&defect).Error; err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "failed to save status"})
+	}
+
+	// reload with relations for response
+	if err := h.db.Preload("Building").Preload("CreatedBy").Preload("Responsible").First(&defect, defect.ID).Error; err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "failed to load defect"})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(toDefectResponse(defect))
+}
+
 
 // DeleteDefect deletes defect by id.
 // @Summary     Delete defect

@@ -914,6 +914,80 @@ const docTemplate = `{
                         }
                     }
                 }
+            },
+            "patch": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Change status of a defect. Allowed status transitions depend on user role (engineer/manager). Allowed status values: new, in_progress, review, closed.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "defects"
+                ],
+                "summary": "Update defect status",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Defect ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "New status",
+                        "name": "payload",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handlers.UpdateStatusReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.DefectResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "invalid id or request body or missing status",
+                        "schema": {
+                            "$ref": "#/definitions/common.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "unauthenticated",
+                        "schema": {
+                            "$ref": "#/definitions/common.ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "insufficient permissions or role cannot set this status",
+                        "schema": {
+                            "$ref": "#/definitions/common.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "defect not found",
+                        "schema": {
+                            "$ref": "#/definitions/common.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/common.ErrorResponse"
+                        }
+                    }
+                }
             }
         },
         "/api/defects/{id}/attachments": {
@@ -1599,6 +1673,15 @@ const docTemplate = `{
                 },
                 "stage": {
                     "description": "example: в_строительстве",
+                    "type": "string"
+                }
+            }
+        },
+        "handlers.UpdateStatusReq": {
+            "type": "object",
+            "properties": {
+                "status": {
+                    "description": "example: in_progress\nВозможные значения: \"new\", \"in_progress\", \"review\", \"closed\" (зависит от вашей логики)",
                     "type": "string"
                 }
             }
