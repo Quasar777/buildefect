@@ -1,0 +1,214 @@
+@use '../../styles/helpers' as *;
+
+.create-defect-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-block: rem(24);
+
+  h2 {
+    margin-bottom: rem(16);
+    font-size: rem(20);
+  }
+
+  .create-defect-form {
+    background-color: #E6E6E6; // как в signUpForm
+    width: rem(880); // чуть шире, потому что форма длинная
+    padding-top: rem(20);
+    padding-bottom: rem(28);
+    padding-inline: rem(20);
+    border-radius: rem(6);
+    box-shadow: 0px 6px 5px -5px rgba(0,0,0,0.5);
+    display: flex;
+    flex-direction: column;
+    gap: rem(12);
+
+    // Основные строки формы
+    .form-row,
+    .form-row-grid {
+      display: flex;
+      flex-direction: column;
+      margin-bottom: rem(12);
+
+      label {
+        font-weight: 600;
+        margin-bottom: rem(8);
+        font-size: rem(14);
+      }
+
+      input[type="text"],
+      input[type="number"],
+      input[type="datetime-local"],
+      select,
+      textarea {
+        width: 100%;
+        height: rem(46);
+        padding: 0 rem(14);
+        border: 1px solid #d9d9d9;
+        border-radius: rem(6);
+        font-size: rem(14);
+        font-family: 'Inter', sans-serif;
+        background-color: #fff;
+        transition: border-color 0.18s ease, box-shadow 0.18s ease;
+
+        &:focus {
+          outline: none;
+          border-color: #000;
+          box-shadow: 0 0 0 4px rgba(0,0,0,0.02);
+        }
+
+        &::placeholder {
+          color: rgba(0,0,0,0.45);
+        }
+      }
+
+      input[type="file"] {
+        width: 100%;
+        height: rem(46);
+        padding: rem(10) rem(14);
+        border: 1px solid #d9d9d9;
+        border-radius: rem(6);
+        font-size: rem(14);
+        font-family: 'Inter', sans-serif;
+        background-color: #fff;
+        transition: border-color 0.18s ease, box-shadow 0.18s ease;
+      }
+
+      
+
+
+      textarea {
+        min-height: rem(120);
+        height: auto;
+        padding-top: rem(10);
+        padding-bottom: rem(10);
+        resize: vertical;
+      }
+
+      .hint {
+        margin-top: rem(8);
+        font-size: rem(12);
+        color: rgba(0,0,0,0.55);
+      }
+    }
+
+    // двухколоночная область (priority + deadline)
+    .form-row-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: rem(12);
+      margin-bottom: rem(10);
+
+      > div {
+        display: flex;
+        flex-direction: column;
+      }
+    }
+
+    // превью выбранной картинки и подписями
+    .file-preview {
+      display: flex;
+      gap: rem(12);
+      align-items: center;
+
+      .preview-box {
+        width: rem(120);
+        height: rem(90);
+        background: #fff;
+        border: 1px solid #e6e6e6;
+        border-radius: rem(6);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+
+        img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+      }
+
+      .preview-info {
+        font-size: rem(13);
+        color: #333;
+      }
+    }
+
+    .form-error {
+      color: #ff4d4f;
+      font-size: rem(14);
+      margin-top: rem(4);
+      min-height: rem(18);
+      text-align: left;
+    }
+
+    .form-success {
+      color: #52c41a;
+      font-size: rem(14);
+      margin-top: rem(4);
+      min-height: rem(18);
+      text-align: left;
+    }
+
+    .form-actions {
+      display: flex;
+      gap: rem(12);
+      margin-top: rem(6);
+      align-items: center;
+
+      button {
+        height: rem(46);
+        padding: 0 rem(18);
+        border-radius: rem(6);
+        border: none;
+        cursor: pointer;
+        font-size: rem(15);
+        font-family: 'Inter', sans-serif;
+        transition: background-color 0.18s ease, transform 0.08s ease;
+      }
+
+      button[type="submit"] {
+        background-color: #000;
+        color: #fff;
+
+        &:hover:not(:disabled) {
+          background-color: #333;
+          transform: translateY(-1px);
+        }
+
+        &:disabled {
+          background-color: #bfbfbf;
+          cursor: not-allowed;
+        }
+      }
+
+      .btn-secondary {
+        background-color: #fff;
+        color: #000;
+        border: 1px solid #d9d9d9;
+
+        &:hover:not(:disabled) {
+          background-color: #f4f4f4;
+        }
+      }
+    }
+  }
+
+  // Мобильная адаптация (если потребуется)
+  @media (max-width: 900px) {
+    .create-defect-form {
+      width: 100%;
+      padding-inline: rem(12);
+
+      .form-row-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .file-preview {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+  }
+}

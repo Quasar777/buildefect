@@ -1,0 +1,268 @@
+@use '../../styles/helpers' as *;
+
+.defect-page {
+  padding: rem(20);
+  display: flex;
+  flex-direction: column;
+  gap: rem(20);
+
+  &__title {
+    font-size: rem(24);
+    font-weight: 600;
+    color: #000;
+    margin-bottom: rem(16);
+  }
+
+  &__main {
+    display: flex;
+    gap: rem(20);
+
+    @media (max-width: 768px) {
+      flex-direction: column;
+    }
+  }
+
+  &__image {
+    flex-shrink: 0;
+    width: rem(400);
+    height: rem(400);
+    background-color: #f5f5f5;
+    border-radius: rem(8);
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+  }
+
+  &__details {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: rem(12);
+
+    .defect-info {
+      display: grid;
+      grid-template-columns: max-content 1fr;
+      column-gap: rem(12);
+      row-gap: rem(4);
+
+      p {
+        margin: 0;
+        font-size: rem(14);
+        color: #333;
+        line-height: 1.4;
+
+        b {
+          font-weight: 600;
+        }
+      }
+    }
+
+    .defect-page__actions {
+      display: flex;
+      gap: rem(12);
+      margin-top: rem(12);
+
+      button {
+        height: rem(40);
+        padding: 0 rem(12);
+        background-color: #000;
+        color: #fff;
+        border: none;
+        border-radius: rem(5);
+        cursor: pointer;
+        font-size: rem(14);
+        transition: background-color 0.3s ease;
+
+        &:hover:not(:disabled) {
+          background-color: #333;
+        }
+
+        &:disabled {
+          background-color: #ccc;
+          cursor: not-allowed;
+        }
+      }
+    }
+
+    button {
+      margin-left: rem(8);
+      padding: 0 rem(8);
+      height: rem(28);
+      font-size: rem(12);
+      border-radius: rem(4);
+      background-color: #1890ff;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+
+      &:hover {
+        background-color: #40a9ff;
+      }
+    }
+  }
+
+  &__comments {
+    display: flex;
+    flex-direction: column;
+    gap: rem(12);
+
+    h3 {
+      margin: 0;
+      font-size: rem(18);
+      font-weight: 600;
+      color: #000;
+    }
+
+    .comment-card {
+      background-color: #fff;
+      border-radius: rem(8);
+      padding: rem(12);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+      display: flex;
+      flex-direction: column;
+      gap: rem(4);
+
+      b {
+        font-weight: 600;
+      }
+
+      button {
+        align-self: flex-end;
+        padding: 0 rem(8);
+        height: rem(28);
+        font-size: rem(12);
+        border-radius: rem(4);
+        background-color: #ff4d4f;
+        color: #fff;
+        border: none;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+
+        &:hover {
+          background-color: #ff7875;
+        }
+      }
+    }
+
+    &__add-comment {
+      display: flex;
+      flex-direction: column;
+      gap: rem(8);
+
+      textarea {
+        width: 100%;
+        min-height: rem(60);
+        padding: rem(8);
+        font-size: rem(14);
+        border-radius: rem(5);
+        border: 1px solid #d9d9d9;
+        font-family: 'Inter', sans-serif;
+        resize: vertical;
+
+        &:focus {
+          outline: none;
+          border-color: #000;
+        }
+      }
+
+      button {
+        width: rem(120);
+        align-self: flex-end;
+        height: rem(36);
+        background-color: #000;
+        color: #fff;
+        border: none;
+        border-radius: rem(5);
+        cursor: pointer;
+        font-size: rem(14);
+        transition: background-color 0.3s ease;
+
+        &:hover:not(:disabled) {
+          background-color: #333;
+        }
+
+        &:disabled {
+          background-color: #ccc;
+          cursor: not-allowed;
+        }
+      }
+    }
+  }
+}
+
+.defect-page__add-comment {
+  display: flex;
+  flex-direction: column;
+  gap: rem(8);
+  margin-top: rem(12);
+
+  textarea {
+    width: 100%;
+    min-height: rem(80);
+    padding: rem(10);
+    font-size: rem(14);
+    border-radius: rem(6);
+    border: 1px solid #d9d9d9;
+    font-family: 'Inter', sans-serif;
+    resize: vertical;
+    background-color: #fff;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+
+    &:focus {
+      outline: none;
+      border-color: #000;
+      box-shadow: 0 0 0 rem(2) rgba(0, 0, 0, 0.1);
+    }
+
+    &::placeholder {
+      color: rgba(0, 0, 0, 0.4);
+    }
+  }
+
+  button {
+    width: rem(140);
+    align-self: flex-end;
+    height: rem(40);
+    padding: 0 rem(12);
+    background-color: #000;
+    color: #fff;
+    border: none;
+    border-radius: rem(6);
+    font-size: rem(14);
+    font-family: 'Inter', sans-serif;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+
+    &:hover:not(:disabled) {
+      background-color: #333;
+    }
+
+    &:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+    }
+  }
+}
+
+.defect-page__back {
+  margin-bottom: rem(16);
+
+  button {
+    background-color: transparent;
+    border: none;
+    color: #1890ff;
+    font-size: rem(14);
+    cursor: pointer;
+    transition: color 0.2s ease;
+
+    &:hover {
+      color: #40a9ff;
+    }
+  }
+}

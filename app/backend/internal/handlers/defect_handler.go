@@ -416,6 +416,11 @@ func (h *DefectHandler) UpdateStatus(c *fiber.Ctx) error {
 		allowed["in_progress"] = struct{}{}
 		allowed["review"] = struct{}{}
 		allowed["closed"] = struct{}{}
+	case "observer":
+		allowed["new"] = struct{}{}
+		allowed["in_progress"] = struct{}{}
+		allowed["review"] = struct{}{}
+		allowed["closed"] = struct{}{}
 	default:
 		// other roles can't change status
 		return c.Status(fiber.StatusForbidden).JSON(fiber.Map{"error": "insufficient permissions"})

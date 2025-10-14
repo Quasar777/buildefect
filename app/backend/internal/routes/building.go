@@ -11,10 +11,6 @@ import (
 func RegisterBuildingRoutes(app *fiber.App, db *gorm.DB, jwtSecret string) {
 	h := handlers.NewBuildingHandler(db)
 
-	// TODO: сделать возможность обновления и создания данных только для ролей observer и manager. 
-	// Сейчас оставлю так для удобства тестирования
-
-
 	app.Post("/api/buildings", 
 		middleware.JWTMiddleware(jwtSecret),
 		middleware.RequireRoles("observer", "manager"),

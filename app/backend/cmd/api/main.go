@@ -5,11 +5,12 @@ import (
 	"github.com/Quasar777/buildefect/app/backend/internal/database/postgresql"
 	"github.com/Quasar777/buildefect/app/backend/internal/routes"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 
-	"github.com/gofiber/swagger"
 	_ "github.com/Quasar777/buildefect/app/backend/cmd/api/docs"
+	"github.com/gofiber/swagger"
 )
 
 // @title           buildefect api
@@ -39,6 +40,14 @@ func main() {
 	
 	app := fiber.New()
 
+	// cors
+	app.Use(cors.New(cors.Config{
+		AllowOrigins: "http://localhost:3000",
+		AllowMethods: "GET,POST,PUT,DELETE,PATCH,OPTIONS",
+		AllowHeaders: "Origin, Content-Type, Accept, Authorization",
+		AllowCredentials: true,
+	}))
+
 	routes.RegisterUserRoutes(app, pg.GormDB, cfg.JWTSecret)
 	routes.RegisterBuildingRoutes(app, pg.GormDB, cfg.JWTSecret)
 	routes.RegisterDefectRoutes(app, pg.GormDB, cfg.JWTSecret)
@@ -51,6 +60,7 @@ func main() {
 	
 	// swagger
     app.Get("/swagger/*", swagger.HandlerDefault)
+	
 
     // Запуск приложения
 	if err := app.Listen(":8080"); err != nil {

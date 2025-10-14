@@ -43,3 +43,44 @@ go run cmd/api/main.go
 
 The server will start, and by default, it should be accessible at http://localhost:8080 (adjust the port if configured differently).
 
+
+#### Frontend
+
+Вот как можно оформить документацию по запуску фронтенда, в стиле твоего бэкенда:
+
+---
+
+### Frontend
+
+Before running the frontend, make sure you have the following installed on your machine:
+
+* [Node.js](https://nodejs.org/) (version 18 or higher recommended)
+* [npm](https://www.npmjs.com/) or [Yarn](https://yarnpkg.com/) package manager
+* Optional: [Git](https://git-scm.com/downloads) to clone the repository
+
+
+1. Navigate to the frontend directory:
+
+```bash
+cd buildefect/frontend
+```
+
+2. Install dependencies:
+
+```bash
+npm install
+# or, if you use Yarn:
+# yarn install
+```
+
+4. Start the development server:
+
+```bash
+npm run start
+# or, if you use Yarn:
+# yarn start
+```
+
+The frontend server will start, usually accessible at [http://localhost:3000](http://localhost:3000).
+Make sure the backend is running (default at [http://localhost:8080](http://localhost:8080)) so that API requests work correctly.
+

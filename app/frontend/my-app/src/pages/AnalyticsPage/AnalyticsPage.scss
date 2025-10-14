@@ -1,0 +1,124 @@
+@use '../../styles/helpers' as *;
+
+.analytics-page {
+  padding: rem(20);
+  display: flex;
+  flex-direction: column;
+  gap: rem(18);
+
+  &__title {
+    font-size: rem(20);
+    margin: 0 0 rem(6) 0;
+  }
+
+  &__loading,
+  &__error {
+    color: #666;
+    padding: rem(12);
+  }
+
+  .metrics-cards {
+    display: flex;
+    gap: rem(12);
+    align-items: stretch;
+    margin-bottom: rem(8);
+
+    .metric-card {
+      flex: 1;
+      background: #fff;
+      border-radius: rem(8);
+      padding: rem(18);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: center;
+
+      &__value {
+        font-size: rem(28);
+        font-weight: 700;
+        color: #000;
+      }
+
+      &__label {
+        margin-top: rem(8);
+        font-size: rem(13);
+        color: #666;
+      }
+    }
+  }
+
+  .charts-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: rem(12);
+
+    .chart-card {
+      background: #fff;
+      border-radius: rem(8);
+      padding: rem(12);
+      min-height: rem(260);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+
+      &--doughnut {
+        // Doughnut будет центрирован в блоке
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      &--bar {
+        // Bar занимает весь блок
+      }
+    }
+  }
+
+  @media (max-width: 900px) {
+    .charts-row {
+      grid-template-columns: 1fr;
+    }
+
+    .metrics-cards {
+      flex-direction: column;
+    }
+  }
+}
+
+.analytics-actions {
+  display: flex;
+  gap: rem(10);
+  margin-bottom: rem(20);
+
+  button {
+    background-color: #000;
+    color: #fff;
+    border: none;
+    border-radius: rem(5);
+    padding: rem(10) rem(14);
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    font-size: rem(14);
+    transition: background-color 0.3s ease;
+
+    &:hover {
+      background-color: #333;
+    }
+  }
+}
+
+.analytics-page__back {
+  margin-bottom: rem(16);
+
+  button {
+    background-color: transparent;
+    border: none;
+    color: #1890ff;
+    font-size: rem(14);
+    cursor: pointer;
+    transition: color 0.2s ease;
+
+    &:hover {
+      color: #40a9ff;
+    }
+  }
+}

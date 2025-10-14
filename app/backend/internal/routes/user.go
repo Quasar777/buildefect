@@ -17,6 +17,10 @@ func RegisterUserRoutes(app *fiber.App, db *gorm.DB, jwtSecret string) {
 	app.Post("/api/auth/register", ah.Register)
 	app.Post("/api/auth/login", ah.Login)
 
+	app.Get("/api/me", middleware.JWTMiddleware(jwtSecret), func(c *fiber.Ctx) error {
+		return uh.GetUserByCtx(c) // implement helper in UserHandler to read c.Locals("user_id")
+	})
+
 	// user managing
 	app.Post("/api/users", 
 		middleware.JWTMiddleware(jwtSecret),
@@ -26,13 +30,13 @@ func RegisterUserRoutes(app *fiber.App, db *gorm.DB, jwtSecret string) {
 	
 	app.Get("/api/users", 
 		middleware.JWTMiddleware(jwtSecret),
-		middleware.RequireRoles("observer"), 
+		// middleware.RequireRoles("observer"), 
 		uh.GetUsers,
 	)
 
 	app.Get("/api/users/:id", 
 		middleware.JWTMiddleware(jwtSecret),
-		middleware.RequireRoles("observer"), 
+		// middleware.RequireRoles("observer"), 
 		uh.GetUser,
 	)
 
