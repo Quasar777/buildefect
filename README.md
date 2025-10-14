@@ -73,7 +73,7 @@ npm install
 # yarn install
 ```
 
-4. Start the development server:
+3. Start the development server:
 
 ```bash
 npm run start
