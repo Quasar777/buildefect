@@ -46,12 +46,6 @@ The server will start, and by default, it should be accessible at http://localho
 
 #### Frontend
 
-Вот как можно оформить документацию по запуску фронтенда, в стиле твоего бэкенда:
-
----
-
-### Frontend
-
 Before running the frontend, make sure you have the following installed on your machine:
 
 * [Node.js](https://nodejs.org/) (version 18 or higher recommended)
